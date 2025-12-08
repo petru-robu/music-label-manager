@@ -2,12 +2,12 @@ services:
   app:
     build: .
     container_name: musiclabel_apache
-    restart: always
+    restart: always 
     depends_on:
       - db
     ports:
-      - "80:80"
-      - "443:443"
+      - "80:80" # port for http
+      - "443:443" # port for https
     environment:
       APP_ENV: production
       DB_HOST: db
@@ -18,7 +18,7 @@ services:
       - musiclabel_net 
 
     volumes:
-      - /etc/letsencrypt:/etc/letsencrypt:ro # persist the certificate between docker rebuilds
+      - /etc/letsencrypt:/etc/letsencrypt:ro # bind local ssl certificates
 
   db:
     image: mysql:8.0
