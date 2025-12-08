@@ -39,6 +39,10 @@ services:
       - "80:80"
     environment:
       APP_ENV: production
+      DB_HOST: db
+      DB_DATABASE: mydb
+      DB_USERNAME: myuser
+      DB_PASSWORD: mypass
     networks:
       - musiclabel_net
 
