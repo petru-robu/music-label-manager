@@ -47,8 +47,7 @@ services:
       - musiclabel_net
 
     volumes:
-      - /etc/letsencrypt/live:/etc/letsencrypt/live:ro
-      - /etc/letsencrypt/archive:/etc/letsencrypt/archive:ro
+      - /etc/letsencrypt/
 
   db:
     image: mysql:8.0
