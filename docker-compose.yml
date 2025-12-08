@@ -46,6 +46,10 @@ services:
     networks:
       - musiclabel_net
 
+    volumes:
+      - /etc/letsencrypt/live:/etc/letsencrypt/live:ro
+      - /etc/letsencrypt/archive:/etc/letsencrypt/archive:ro
+
   db:
     image: mysql:8.0
     container_name: musiclabel_mysql_db
