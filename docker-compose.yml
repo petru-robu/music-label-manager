@@ -17,7 +17,7 @@ services:
       - musiclabel_net 
 
     volumes:
-      - /etc/letsencrypt/ #persist the certificate between docker rebuilds
+      - /etc/letsencrypt:/etc/letsencrypt:ro # persist the certificate between docker rebuilds
 
   db:
     image: mysql:8.0

@@ -27,7 +27,7 @@ RUN composer install --no-dev --optimize-autoloader
 # Copy Apache configuration
 COPY 000-default.conf /etc/apache2/sites-available/000-default.conf
 
-# Enable Apache modules
+# Enable Apache modulessudo 
 RUN a2enmod rewrite ssl
 
 # Permissions (optional based on your needs)
