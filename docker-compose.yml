@@ -34,7 +34,7 @@ services:
     container_name: musiclabel_apache
     restart: always
     depends_on:
-      - mysql
+      - db
     ports:
       - "80:80"
     environment:
