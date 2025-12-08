@@ -1,18 +1,46 @@
+# services:
+#   app:
+#     build: .
+#     container_name: musiclabel_apache
+#     ports:
+#       - "8080:80"
+#     volumes:
+#       - .:/app
+#     depends_on:
+#       - db
+#     environment:
+#       DB_HOST: db
+#       DB_DATABASE: mydb
+#       DB_USERNAME: myuser
+#       DB_PASSWORD: mypass
+
+#   db:
+#     image: mysql:8.0
+#     container_name: musiclabel_mysql_db
+#     restart: always
+#     environment:
+#       MYSQL_ROOT_PASSWORD: rootpass
+#       MYSQL_DATABASE: mydb
+#       MYSQL_USER: myuser
+#       MYSQL_PASSWORD: mypass
+#     volumes:
+#       - db_data:/var/lib/mysql
+
+# volumes:
+#   db_data:
 services:
   app:
     build: .
     container_name: musiclabel_apache
-    ports:
-      - "8080:80"
-    volumes:
-      - .:/app
+    restart: always
     depends_on:
-      - db
+      - mysql
+    ports:
+      - "80:80"
     environment:
-      DB_HOST: db
-      DB_DATABASE: mydb
-      DB_USERNAME: myuser
-      DB_PASSWORD: mypass
+      APP_ENV: production
+    networks:
+      - musiclabel_net
 
   db:
     image: mysql:8.0
@@ -25,6 +53,11 @@ services:
       MYSQL_PASSWORD: mypass
     volumes:
       - db_data:/var/lib/mysql
+    networks:
+      - musiclabel_net
+
+networks:
+  musiclabel_net:
 
 volumes:
   db_data:

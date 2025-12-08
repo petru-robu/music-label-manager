@@ -1,7 +1,7 @@
 # Music Label Manager
 Website for managing music labels, producers and artists.
 
-This is **DEV** branch.
+This is **DEPLOYMENT** branch.
 
 ## Useful commands
 Run the containers:
