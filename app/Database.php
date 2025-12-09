@@ -1,7 +1,5 @@
 <?php
-
-namespace App;
-
+// manage the Database, uses PDO
 class Database
 {
     public static $pdo = null;
@@ -9,7 +7,8 @@ class Database
     public static function getConnection(): \PDO
     {
         // Return existing connection if already established
-        if (self::$pdo) {
+        if (self::$pdo) 
+        {
             return self::$pdo;
         }
 
@@ -19,7 +18,7 @@ class Database
         $user = getenv('DB_USERNAME');
         $pass = getenv('DB_PASSWORD');
         $charset = 'utf8mb4';
-
+        
         // Construct the DSN - data source name
         $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
 

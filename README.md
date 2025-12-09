@@ -137,3 +137,22 @@ sudo certbot certonly --standalone -d petrucodes.ro -d www.petrucodes.ro
 Certificates auto-renew every 3 months. The Apache virtual host configuration handles the domain and SSL setup.
 
 **Tip:** Always back up your `.env` and database before making major changes.
+
+```
+
+
+
+### Running migrations
+
+To run a migration you need to:
+
+Enter the docker container:
+```bash
+sudo docker exec -it musiclabel_apache /bin/bash
+```
+
+Run the php file to apply everything in the migrations folder:
+```bash
+php app/Commands/migrate.php
+
+```

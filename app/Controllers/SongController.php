@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Controllers;
+require_once __DIR__ . '/Controller.php';
+require_once __DIR__ . '/../Models/Song.php';
 
-use App\Models\Song;
-
-class SongController
+class SongController extends Controller
 {
     private $songModel;
 
@@ -16,12 +15,6 @@ class SongController
     public function index(): void
     {
         $songs = $this->songModel->getAll();
-        header('Content-Type: application/json');
-
-        echo json_encode([
-            'status' => 'success',
-            'count' => count($songs),
-            'data' => $songs,
-        ]);
+        $this->render('Song/index', ['songs' => $songs]);
     }
 }
