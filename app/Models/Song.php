@@ -1,11 +1,9 @@
 <?php
 
-namespace App\Models;
+require_once __DIR__.'/Model.php';
 
-use App\Database;
-
-class Song
-{
+class Song extends Model
+{ 
     public function getAll(): array
     {
         try {
