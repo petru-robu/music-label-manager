@@ -46,8 +46,8 @@ This setup uses two containers:
 # Stop and remove containers
 sudo docker compose down
 
-# Start containers in detached mode
-sudo docker compose up -d
+# Start and rebuild containers in detached mode
+sudo docker compose up -d --build
 ```
 
 #### Useful Docker Commands
@@ -138,6 +138,7 @@ Certificates auto-renew every 3 months. The Apache virtual host configuration ha
 
 **Tip:** Always back up your `.env` and database before making major changes.
 
+## Application Flow
 ### Running migrations
 
 To run a migration you need to:
