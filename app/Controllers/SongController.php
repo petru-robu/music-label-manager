@@ -12,7 +12,7 @@ class SongController extends Controller
         $this->songModel = new Song;
     }
 
-    public function index(): void
+    public function index()
     {
         $songs = $this->songModel->getAll();
         $this->render('Song/index', ['songs' => $songs]);

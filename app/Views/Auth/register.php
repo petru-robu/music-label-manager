@@ -7,3 +7,7 @@
     <input type="password" name="password" placeholder="Password" required>
     <button type="submit">Register</button>
 </form>
+
+<p style="padding-top: 10px">
+    Already have an account? Login <a href="/login">here</a>.
+</p>

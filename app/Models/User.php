@@ -130,6 +130,20 @@ class User extends Model
     {
         return password_verify($password, $this->password_hash);
     }
+
+
+    public function getAll(): array
+    {
+        $pdo = Database::getConnection();
+
+        $sql = "SELECT * FROM " . self::$table;
+        $stmt = $pdo->query($sql);
+
+        if ($stmt === false)
+            return [];
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
 
 
