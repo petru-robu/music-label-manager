@@ -7,7 +7,10 @@
 </form>
 
 <p style="padding-top: 10px">
-    Are you new on the platform? Register <a href="/register">here</a>.
+    Are you new on the platform? Register as: 
+    <a href="/register">listener</a>,
+    <a href="/register_artist">artist</a> or
+    <a href="/register_artist">producer</a>.
 </p>
 
 

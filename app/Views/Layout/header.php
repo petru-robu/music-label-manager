@@ -12,17 +12,19 @@ $username = $_SESSION['username'] ?? '';
 </head>
 <body>
 <nav class="navbar">
-    <a href="/">Home</a>
-
     <?php if ($isLoggedIn): ?>
         <a href="/dashboard">Dashboard</a>
+
+        <?php if ($username): ?>
+            <span class="user-name"><?php echo $username; ?></span>
+        <?php endif; ?>
 
         <form method="POST" action="/logout" class="logout-form">
             <button type="submit">Logout</button>
         </form>
     <?php else: ?>
+        <a href="/">Home</a>
         <a href="/login">Login</a>
-        <a href="/register">Register</a>
     <?php endif; ?>
 </nav>
 

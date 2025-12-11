@@ -61,6 +61,14 @@ class User extends Model
         return (int)$pdo->lastInsertId();
     }
 
+    public static function usernameExists($username) 
+    {
+        $pdo = Database::getConnection();
+        $stmt = $pdo->prepare("SELECT 1 FROM users WHERE username = ?");
+        $stmt->execute([$username]);
+        return $stmt->fetchColumn();
+    }
+
     public static function getByUsername(string $username)
     {
         $pdo = Database::getConnection();
@@ -70,6 +78,14 @@ class User extends Model
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return $user ? self::fromArray($user) : null;
+    }
+
+    public static function emailExists($email) 
+    {
+        $pdo = Database::getConnection();
+        $stmt = $pdo->prepare("SELECT 1 FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+        return $stmt->fetchColumn();
     }
 
     public static function getByEmail(string $email)
@@ -83,17 +99,18 @@ class User extends Model
         return $user ? self::fromArray($user) : null;
     }
 
-    public static function updateUser(int $id, string $username, string $full_name, string $email, ?string $password = null)
+    public static function updateUser(int $id, int $role_id, string $username, string $full_name, string $email, ?string $password = null)
     {
         $pdo = Database::getConnection();
 
         if($password)
         {
             $hash = password_hash($password, PASSWORD_BCRYPT);
-            $stmt = $pdo->prepare("UPDATE " . self::$table . " SET username = :username, full_name = :full_name, 
+            $stmt = $pdo->prepare("UPDATE " . self::$table . " SET role_id = :role_id, username = :username, full_name = :full_name, 
             email = :email, password_hash = :password_hash, updated_at = NOW() WHERE id = :id");
             $result = $stmt->execute([
                 ':id' => $id,
+                ':role_id' => $role_id,
                 ':username' => $username,
                 ':full_name' => $full_name,
                 ':email' => $email,
@@ -102,11 +119,12 @@ class User extends Model
         }
         else
         {
-            $stmt = $pdo->prepare("UPDATE " . self::$table . " SET username = :username, 
+            $stmt = $pdo->prepare("UPDATE " . self::$table . " SET role_id = :role_id, username = :username, 
                 full_name = :full_name, email = :email, updated_at = NOW() WHERE id = :id");
 
             $result = $stmt->execute([
                 ':id' => $id,
+                ':role_id' => $role_id,
                 ':username' => $username,
                 ':full_name' => $full_name,
                 ':email' => $email

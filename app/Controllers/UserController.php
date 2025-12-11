@@ -3,7 +3,6 @@
 require_once __DIR__ . '/Controller.php';
 require_once __DIR__ . '/../Models/User.php';
 
-
 class UserController extends Controller
 {
     private $userModel;
@@ -23,7 +22,15 @@ class UserController extends Controller
     public function delete()
     {
         // Get id from POST first, fallback to GET
-        $id = $_POST['id'] ?? $_GET['id'] ?? null;
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') 
+            $id = $_GET['id'];
+        else if ($_SERVER['REQUEST_METHOD'] === 'POST')
+            $id = $_POST['id'];
+        else 
+        {
+            echo 'Invalid request.';
+            exit;
+        }
 
         if (!$id) 
         {
@@ -31,8 +38,15 @@ class UserController extends Controller
             echo "Bad Request: User ID is required.";
             return;
         }
-
         $id = (int) $id;
+
+        // check to not delete oneself
+        $currentUserId = $_SESSION['user_id'];
+        if ($id === $currentUserId) 
+        {
+            echo 'Cannot delete yourself. Nice try.';
+            exit;
+        }
 
         $deleted = $this->userModel->deleteUser($id);
 
@@ -52,7 +66,6 @@ class UserController extends Controller
     public function update()
     {
         // update an user
-        // get data from POST
         $id = $_POST['id'] ?? null;
         $role_id = $_POST['role_id'] ?? null;
         $username = $_POST['username'] ?? null;
@@ -60,16 +73,33 @@ class UserController extends Controller
         $full_name = $_POST['full_name'] ?? null;
         $password = $_POST['password'] ?? null;
 
-        if (!$id || !$role_id || !$username || !$email || !$full_name) {
+        if (!$id || !$role_id || !$username || !$email || !$full_name) 
+        {
             http_response_code(400);
             echo "Bad Request: Missing required fields.";
             return;
         }
-
         $id = (int) $id;
         $role_id = (int) $role_id;
 
-        $updated = $this->userModel->updateUser($id, $username, $full_name, $email, $password);
+        // check for not changing role
+        $currentUserId = $_SESSION['user_id'];
+        $user = $this->userModel->getUserById($id);
+
+        if (!$user) 
+        {
+            http_response_code(404);
+            echo "User not found.";
+            return;
+        }
+        // Block only if user tries to change his own role
+        if ($id === $currentUserId && $role_id !== $user->role_id) 
+        {
+            echo "You cannot change your own role. Nice try.";
+            return;
+        }
+
+        $updated = $this->userModel->updateUser($id, $role_id, $username, $full_name, $email, $password);
 
         if ($updated) 
         {

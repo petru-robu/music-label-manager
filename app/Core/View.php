@@ -6,6 +6,7 @@ class View
     {
         extract($data);
 
+        // every view is put between a layout
         require __DIR__ . '/../Views/Layout/header.php';
         require __DIR__ . '/../Views/' . $view . '.php';
         require __DIR__ . '/../Views/Layout/footer.php';
