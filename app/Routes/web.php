@@ -37,7 +37,53 @@ $router->post('/users/update', 'UserController@update', ['Auth', 'Role:1']);
 $router->get('/users/edit', 'UserController@edit', ['Auth', 'Role:1']);
 
 // album management routes for artists only
-$router->get('/artist/:id/album', 'AlbumController@indexByArtist', ['Auth', 'Role:2']); // get all albums of an artist
-$router->get('/artist/:id/album/create', 'AlbumController@create', ['Auth', 'Role:2']); // create an album
+$router->get('/artist/:artist_id/album', 'AlbumController@indexByArtist', ['Auth', 'Role:2']);
+
+$router->get('/artist/:artist_id/album/create', 'AlbumController@create', ['Auth', 'Role:2']);
+$router->post('/artist/:artist_id/album/store', 'AlbumController@store', ['Auth', 'Role:2']);
+
+$router->get('/artist/:artist_id/album/:album_id/edit', 'AlbumController@edit', ['Auth', 'Role:2']);
+$router->post('/artist/:artist_id/album/:album_id/update', 'AlbumController@update', ['Auth', 'Role:2']);
+
+$router->get('/artist/:artist_id/album/:album_id/delete', 'AlbumController@delete', ['Auth', 'Role:2']);
+
+
+// song management routes for artists only
+$router->get(
+    '/artist/:artist_id/album/:album_id/song',
+    'SongController@indexByAlbum',
+    ['Auth', 'Role:2']
+);
+
+$router->get(
+    '/artist/:artist_id/album/:album_id/song/create',
+    'SongController@create',
+    ['Auth', 'Role:2']
+);
+
+$router->post(
+    '/artist/:artist_id/album/:album_id/song/store',
+    'SongController@store',
+    ['Auth', 'Role:2']
+);
+
+$router->get(
+    '/artist/:artist_id/album/:album_id/song/:song_id/edit',
+    'SongController@edit',
+    ['Auth', 'Role:2']
+);
+
+$router->post(
+    '/artist/:artist_id/album/:album_id/song/:song_id/update',
+    'SongController@update',
+    ['Auth', 'Role:2']
+);
+
+$router->get(
+    '/artist/:artist_id/album/:album_id/song/:song_id/delete',
+    'SongController@delete',
+    ['Auth', 'Role:2']
+);
+
 
 $router->dispatch();
