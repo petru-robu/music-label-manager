@@ -1,4 +1,5 @@
 <h2>User List</h2>
+<a href="/dashboard">Back to dashboard</a>
 
 <table class="table">
 <thead>

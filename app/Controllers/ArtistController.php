@@ -16,39 +16,34 @@ class ArtistController extends Controller
     {
         // returns a view of all artists
         $artists = $this->artistModel->getAll();
-        $this->render('Artist/index', ['artists' => $artists]); 
+        $this->render('Artist/index', ['artists' => $artists]);
     }
 
     public function delete()
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'GET') 
+        // deletes an artist
+        // check deletion route
+        if ($_SERVER['REQUEST_METHOD'] === 'GET')
             $id = $_GET['id'] ?? null;
         else if ($_SERVER['REQUEST_METHOD'] === 'POST')
             $id = $_POST['id'] ?? null;
-        else 
-        {
+        else {
             echo 'Invalid request.';
             exit;
         }
 
-        if (!$id) 
-        {
+        if (!$id) {
             http_response_code(400);
             echo "Bad Request: Artist ID is required.";
             return;
         }
 
-        $id = (int)$id;
-
+        $id = (int) $id;
         $deleted = $this->artistModel->deleteArtist($id);
-
-        if ($deleted) 
-        {
+        if ($deleted) {
             header('Location: /artists');
             exit;
-        } 
-        else 
-        {
+        } else {
             http_response_code(404);
             echo "Artist not found or could not be deleted.";
         }
@@ -62,20 +57,18 @@ class ArtistController extends Controller
         $stage_name = $_POST['stage_name'] ?? null;
         $bio = $_POST['bio'] ?? '';
 
-        if (!$id || !$user_id || !$stage_name) 
-        {
+        if (!$id || !$user_id || !$stage_name) {
             http_response_code(400);
             echo "Bad Request: Missing required fields.";
             return;
         }
 
-        $id = (int)$id;
-        $user_id = (int)$user_id;
+        $id = (int) $id;
+        $user_id = (int) $user_id;
 
         $artist = $this->artistModel->getArtistById($id);
 
-        if (!$artist) 
-        {
+        if (!$artist) {
             http_response_code(404);
             echo "Artist not found.";
             return;
@@ -83,13 +76,10 @@ class ArtistController extends Controller
 
         $updated = $this->artistModel->updateArtist($id, $user_id, $stage_name, $bio);
 
-        if ($updated) 
-        {
+        if ($updated) {
             header('Location: /artists');
             exit;
-        } 
-        else 
-        {
+        } else {
             http_response_code(500);
             echo "Failed to update artist.";
         }
@@ -99,19 +89,15 @@ class ArtistController extends Controller
     {
         $id = $_GET['id'] ?? null;
 
-        if (!$id) 
-        {
+        if (!$id) {
             http_response_code(400);
             echo "Bad Request: Artist ID is required.";
             return;
         }
 
-        $id = (int)$id;
-
+        $id = (int) $id;
         $artist = $this->artistModel->getArtistById($id);
-
-        if (!$artist) 
-        {
+        if (!$artist) {
             http_response_code(404);
             echo "Artist not found.";
             return;

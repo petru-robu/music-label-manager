@@ -12,7 +12,7 @@ class SongController extends Controller
 
     public function __construct()
     {
-        $this->songModel  = new Song();
+        $this->songModel = new Song();
         $this->albumModel = new Album();
     }
 
@@ -21,8 +21,8 @@ class SongController extends Controller
         $songs = $this->songModel->getByAlbumId((int) $album_id);
 
         $this->render('Song/indexAlbum', [
-            'songs'     => $songs,
-            'artist_id'=> $artist_id,
+            'songs' => $songs,
+            'artist_id' => $artist_id,
             'album_id' => $album_id
         ]);
     }
@@ -52,7 +52,7 @@ class SongController extends Controller
 
         $this->render('Song/create', [
             'artist_id' => $artist->id,
-            'album_id'  => $album->id
+            'album_id' => $album->id
         ]);
     }
 
@@ -79,7 +79,7 @@ class SongController extends Controller
             return;
         }
 
-        $title    = $_POST['title'] ?? null;
+        $title = $_POST['title'] ?? null;
         $duration = $_POST['duration'] ?? null;
 
         if (!$title) {
@@ -134,8 +134,8 @@ class SongController extends Controller
         }
 
         $this->render('Song/edit', [
-            'song'      => $song,
-            'artist_id'=> $artist->id,
+            'song' => $song,
+            'artist_id' => $artist->id,
             'album_id' => $album->id
         ]);
     }
@@ -170,7 +170,7 @@ class SongController extends Controller
             return;
         }
 
-        $title    = $_POST['title'] ?? null;
+        $title = $_POST['title'] ?? null;
         $duration = $_POST['duration'] ?? null;
 
         if (!$title) {

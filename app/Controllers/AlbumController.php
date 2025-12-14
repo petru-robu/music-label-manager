@@ -33,6 +33,7 @@ class AlbumController extends Controller
 
     public function delete($artist_id, $album_id)
     {
+        // delete a specific album
         $user_id = $_SESSION['user_id'] ?? null;
         if (!$user_id) {
             http_response_code(403);
@@ -58,6 +59,7 @@ class AlbumController extends Controller
         $deleted = $this->albumModel->deleteAlbum((int) $album_id);
 
         if ($deleted) {
+            // deleted successfully
             header("Location: /artist/{$artist->id}/album");
             exit;
         }
@@ -68,6 +70,7 @@ class AlbumController extends Controller
 
     public function update($artist_id, $album_id)
     {
+        // update a specific album
         $user_id = $_SESSION['user_id'] ?? null;
         if (!$user_id) {
             http_response_code(403);
@@ -109,6 +112,7 @@ class AlbumController extends Controller
         );
 
         if ($updated) {
+            // update successfully
             header("Location: /artist/{$artist->id}/album");
             exit;
         }
@@ -120,7 +124,7 @@ class AlbumController extends Controller
 
     public function edit($artist_id, $album_id)
     {
-        // get the artist
+        // returns the view for editing an artist
         $user_id = $_SESSION['user_id'] ?? null;
         if (!$user_id) {
             http_response_code(403);

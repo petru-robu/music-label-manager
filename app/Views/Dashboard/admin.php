@@ -17,5 +17,6 @@
 
 <div>
     <a href="/users">Manage users</a> <br />
+    <a href="/admin/analytics">View analytics</a> <br />
 </div>
 
