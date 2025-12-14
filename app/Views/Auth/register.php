@@ -1,13 +1,19 @@
 <h2>Register</h2>
 
-<form method="post" action="/register">
+<?php if (!empty($error)): ?>
+    <p style="color:red;"><?php echo htmlspecialchars($error); ?></p>
+<?php endif; ?>
+
+<form method="POST" action="/register">
     <input type="text" name="username" placeholder="Username" required>
     <input type="text" name="full_name" placeholder="Full Name" required>
     <input type="email" name="email" placeholder="Email" required>
     <input type="password" name="password" placeholder="Password" required>
+
+    <div style="margin-top:10px;">
+        <img src="/captcha.php" alt="CAPTCHA">
+        <input type="text" name="captcha" placeholder="Enter CAPTCHA" required style="display:block; margin-top:5px;">
+    </div>
+
     <button type="submit">Register</button>
 </form>
-
-<p style="padding-top: 10px">
-    Already have an account? Login <a href="/login">here</a>.
-</p>

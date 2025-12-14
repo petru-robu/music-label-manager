@@ -1,13 +1,11 @@
 <?php
-# have to include env here, because it is run in CLI
+// have to include env here, because it is run in CLI
 require_once __DIR__ . '/../../vendor/autoload.php';
-
 $root = dirname(__DIR__, 2);
 $dotenv = Dotenv\Dotenv::createImmutable($root);
 $dotenv->load();
 
 require_once __DIR__ . '/../Database.php';
-
 $pdo = Database::getConnection();
 $migrationsDir = __DIR__ . '/../Migrations/';
 

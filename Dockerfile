@@ -8,12 +8,17 @@ RUN apt-get update && \
     apt-get install -y \
         git \
         unzip \
+        libfreetype6-dev \
         libpq-dev \
-        libzip-dev && \
-    rm -rf /var/lib/apt/lists/*
+        libzip-dev \
+        libpng-dev \
+        libjpeg62-turbo-dev
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo pdo_mysql zip
+# 2. Install PHP extensions
+RUN docker-php-ext-configure gd \
+        --with-freetype \
+        --with-jpeg \
+    && docker-php-ext-install gd pdo pdo_mysql zip
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer

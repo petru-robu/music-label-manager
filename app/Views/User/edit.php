@@ -31,5 +31,6 @@
     
     <div>
         <button type="submit">Update User</button>
+        <a href="/users">Cancel</a>
     </div>
 </form>

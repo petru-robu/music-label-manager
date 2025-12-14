@@ -93,6 +93,31 @@ return new class
                 'full_name' => 'Ozzy Osbourne',
                 'password_hash' => password_hash('1234', PASSWORD_DEFAULT),
             ],
+
+
+            // producers
+            [
+                'role_id' => 2,
+                'username' => 'rickrubin',
+                'email' => 'rickrubin@example.com',
+                'full_name' => 'Rick Rubin',
+                'password_hash' => password_hash('1234', PASSWORD_DEFAULT),
+            ],
+            [
+                'role_id' => 2,
+                'username' => 'pharell',
+                'email' => 'pharell@example.com',
+                'full_name' => 'Pharell Williams',
+                'password_hash' => password_hash('1234', PASSWORD_DEFAULT),
+            ],
+            [
+                'role_id' => 2,
+                'username' => 'timbaland',
+                'email' => 'timbaland@example.com',
+                'full_name' => 'Timbaland',
+                'password_hash' => password_hash('1234', PASSWORD_DEFAULT),
+            ],
+
         ];
 
 

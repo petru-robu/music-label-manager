@@ -36,6 +36,10 @@ $router->get('/users/delete', 'UserController@delete', ['Auth', 'Role:1']);
 $router->post('/users/update', 'UserController@update', ['Auth', 'Role:1']);
 $router->get('/users/edit', 'UserController@edit', ['Auth', 'Role:1']);
 
+// admin analytics
+$router->get('/admin/analytics', 'AnalyticsController@index', ['Auth', 'Role:1']);
+$router->get('/admin/analytics/purge/:days', 'AnalyticsController@purgeOld', ['Auth', 'Role:1']);
+
 // album management routes for artists only
 $router->get('/artist/:artist_id/album', 'AlbumController@indexByArtist', ['Auth', 'Role:2']);
 
@@ -46,7 +50,6 @@ $router->get('/artist/:artist_id/album/:album_id/edit', 'AlbumController@edit', 
 $router->post('/artist/:artist_id/album/:album_id/update', 'AlbumController@update', ['Auth', 'Role:2']);
 
 $router->get('/artist/:artist_id/album/:album_id/delete', 'AlbumController@delete', ['Auth', 'Role:2']);
-
 
 // song management routes for artists only
 $router->get(
@@ -84,6 +87,5 @@ $router->get(
     'SongController@delete',
     ['Auth', 'Role:2']
 );
-
 
 $router->dispatch();
