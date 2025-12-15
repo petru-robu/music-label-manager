@@ -21,6 +21,8 @@ $username = $_SESSION['username'] ?? '';
 <body>
     <nav class="navbar">
         <?php if ($isLoggedIn): ?>
+            <a href="/">Home</a>
+            <a href="/about">About</a>
             <a href="/dashboard">Dashboard</a>
 
             <?php if ($username): ?>
@@ -32,7 +34,9 @@ $username = $_SESSION['username'] ?? '';
             </form>
         <?php else: ?>
             <a href="/">Home</a>
+            <a href="/about">About</a>
             <a href="/login">Login</a>
+            
         <?php endif; ?>
     </nav>
 

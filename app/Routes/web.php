@@ -4,6 +4,7 @@ $router = new Router();
 
 // public routes (seen by all)
 $router->get('/', ['view' => 'Home']);
+$router->get('/about', ['view' => 'About']);
 $router->get('/artists', 'ArtistController@index');
 $router->get('/albums', 'AlbumController@index');
 $router->get('/songs', 'SongController@index');
@@ -88,4 +89,13 @@ $router->get(
     ['Auth', 'Role:2']
 );
 
+$router->get('/contact', 'ContactController@index');
+$router->post('/contact/submit', 'ContactController@submit');
+
+
 $router->dispatch();
+
+
+// GET  /contact           → ContactController@index
+// POST /contact/submit    → ContactController@submit
+

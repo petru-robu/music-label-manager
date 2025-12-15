@@ -3,6 +3,7 @@
 require_once __DIR__ . '/Controller.php';
 require_once __DIR__ . '/../Models/User.php';
 require_once __DIR__ . '/../Models/Artist.php';
+require_once __DIR__ . '/../Services/MailService.php';
 
 class AuthController extends Controller
 {
@@ -40,14 +41,6 @@ class AuthController extends Controller
         // POST request
         $email = $_POST['email'] ?? '';
         $password = $_POST['password'] ?? '';
-        $captcha = $_POST['captcha'] ?? '';
-
-        if (empty($captcha) || $captcha !== ($_SESSION['captcha'] ?? ''))
-        {
-            $this->setError('Invalid CAPTCHA!');
-            header('Location: /login');
-            exit;
-        }
 
         $user = User::getByEmail($email);
 
@@ -75,12 +68,12 @@ class AuthController extends Controller
             return $this->render('Auth/register', ['error' => $error]);
         }
 
+        // Validate CAPTCHA
         $captcha = $_POST['captcha'] ?? '';
         if (empty($captcha) || $captcha !== ($_SESSION['captcha'] ?? ''))
         {
             $this->setError('Invalid captcha!');
-            header('Location: /register');
-            exit;
+            return $this->render('Auth/register', ['error' => $this->getError()]);
         }
 
         $username = trim($_POST['username'] ?? '');
@@ -92,26 +85,29 @@ class AuthController extends Controller
         if ($this->userModel->usernameExists($username))
         {
             $this->setError('Username already exists!');
-            header('Location: /register');
-            exit;
+            return $this->render('Auth/register', ['error' => $this->getError()]);
         }
 
         if ($this->userModel->emailExists($email))
         {
             $this->setError('Email already exists!');
-            header('Location: /register');
-            exit;
+            return $this->render('Auth/register', ['error' => $this->getError()]);
         }
 
         if (!$this->userModel->createUser($username, $full_name, $email, $password, $role))
         {
             $this->setError('Registration failed!');
-            header('Location: /register');
-            exit;
+            return $this->render('Auth/register', ['error' => $this->getError()]);
         }
 
-        header('Location: /login');
-        exit;
+        // Send welcome email
+        $mailService = new MailService();
+        $mailService->send($email, 'Welcome', 'Thanks for registering.');
+
+        // Render same page with success message
+        return $this->render('Auth/register', [
+            'success' => 'Registration successful! You can now log in. <br> Log in <a href="/login">here</a>.'
+        ]);
     }
 
     public function register_artist()
@@ -119,17 +115,24 @@ class AuthController extends Controller
         if ($_SERVER['REQUEST_METHOD'] === 'GET')
         {
             $error = $this->getError();
-            return $this->render('Auth/register_artist', ['error' => $error]);
+            $success = $_SESSION['success'] ?? '';
+            unset($_SESSION['success']);
+
+            return $this->render('Auth/register_artist', [
+                'error' => $error,
+                'success' => $success
+            ]);
         }
 
+        // Validate CAPTCHA
         $captcha = $_POST['captcha'] ?? '';
         if (empty($captcha) || $captcha !== ($_SESSION['captcha'] ?? ''))
         {
             $this->setError('Invalid CAPTCHA!');
-            header('Location: /register_artist');
-            exit;
+            return $this->render('Auth/register_artist', ['error' => $this->getError()]);
         }
 
+        // Get form inputs
         $username = trim($_POST['username'] ?? '');
         $full_name = trim($_POST['full_name'] ?? '');
         $email = trim($_POST['email'] ?? '');
@@ -139,25 +142,23 @@ class AuthController extends Controller
         $stage_name = trim($_POST['stage_name'] ?? '');
         $bio = trim($_POST['bio'] ?? '');
 
+        // Validate required fields
         if (!$username || !$full_name || !$email || !$password || !$stage_name)
         {
             $this->setError('Please fill in all required fields.');
-            header('Location: /register_artist');
-            exit;
+            return $this->render('Auth/register_artist', ['error' => $this->getError()]);
         }
 
         if ($this->userModel->usernameExists($username))
         {
             $this->setError('Username already exists!');
-            header('Location: /register_artist');
-            exit;
+            return $this->render('Auth/register_artist', ['error' => $this->getError()]);
         }
 
         if ($this->userModel->emailExists($email))
         {
             $this->setError('Email already exists!');
-            header('Location: /register_artist');
-            exit;
+            return $this->render('Auth/register_artist', ['error' => $this->getError()]);
         }
 
         // Create user
@@ -165,8 +166,7 @@ class AuthController extends Controller
         if (!$user_id)
         {
             $this->setError('Failed to create user account.');
-            header('Location: /register_artist');
-            exit;
+            return $this->render('Auth/register_artist', ['error' => $this->getError()]);
         }
 
         // Create artist
@@ -175,13 +175,19 @@ class AuthController extends Controller
         {
             $this->userModel->deleteUser($user_id);
             $this->setError('Failed to create artist profile.');
-            header('Location: /register_artist');
-            exit;
+            return $this->render('Auth/register_artist', ['error' => $this->getError()]);
         }
 
-        header('Location: /login');
-        exit;
+        // Send welcome email
+        $mailService = new MailService();
+        $mailService->send($email, 'Welcome', 'Thanks for registering.');
+
+        // Render same page with success message
+        return $this->render('Auth/register', [
+            'success' => 'Registration successful! You can now log in.<br /> Log in <a href="/login">here</a>.'
+        ]);
     }
+
 
     public function logout()
     {
