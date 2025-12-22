@@ -20,8 +20,8 @@ $pdo->exec($sql);
 $sql = "SELECT name FROM migrations";
 $applied = $pdo->query($sql)->fetchAll(PDO::FETCH_COLUMN);
 
-// Try applying all migrations in Migrations directory 
-foreach(scandir($migrationsDir) as $file) 
+// try applying all migrations in migrations directory
+foreach (scandir($migrationsDir) as $file)
 {
     if (pathinfo($file, PATHINFO_EXTENSION) != 'php')
         continue;

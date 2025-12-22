@@ -1,7 +1,11 @@
 <h2>Register as an Artist</h2>
 
 <?php if (!empty($error)): ?>
-    <p style="color:red;"><?php echo htmlspecialchars($error); ?></p>
+    <div class="alert alert-error"><?= $error ?></div>
+<?php endif; ?>
+
+<?php if (!empty($success)): ?>
+    <div class="alert alert-success"><?= $success ?></div>
 <?php endif; ?>
 
 <form method="POST" action="/register_artist">

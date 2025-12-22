@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__.'/Model.php';
+require_once __DIR__ . '/Model.php';
 
 class User extends Model
 {
@@ -15,9 +15,9 @@ class User extends Model
     public ?string $created_at = null;
     public ?string $updated_at = null;
 
-    public function __construct(array $data = []) 
+    public function __construct(array $data = [])
     {
-        if (!empty($data)) 
+        if (!empty($data))
         {
             $this->id = (int)($data['id'] ?? 0);
             $this->role_id = (int)($data['role_id'] ?? 1);
@@ -30,12 +30,12 @@ class User extends Model
         }
     }
 
-    public static function fromArray(array $data): self 
+    public static function fromArray(array $data): self
     {
         return new self($data);
     }
 
-    public static function getUserById(int $id) : ?User 
+    public static function getUserById(int $id): ?User
     {
         $model = new self();
         $userData = $model->getById(self::$table, $id);
@@ -47,9 +47,9 @@ class User extends Model
         $hash = password_hash($password, PASSWORD_BCRYPT);
         $pdo = Database::getConnection();
 
-        $stmt = $pdo->prepare("INSERT INTO " . self::$table . 
+        $stmt = $pdo->prepare("INSERT INTO " . self::$table .
             " (role_id, username, email, password_hash, full_name) VALUES (:role_id, :username, :email, :password_hash, :full_name)");
-        
+
         $stmt->execute([
             ':role_id' => $role,
             ':username' => $username,
@@ -57,11 +57,11 @@ class User extends Model
             ':password_hash' => $hash,
             ':full_name' => $full_name
         ]);
-        
+
         return (int)$pdo->lastInsertId();
     }
 
-    public static function usernameExists($username) 
+    public static function usernameExists($username)
     {
         $pdo = Database::getConnection();
         $stmt = $pdo->prepare("SELECT 1 FROM users WHERE username = ?");
@@ -80,7 +80,7 @@ class User extends Model
         return $user ? self::fromArray($user) : null;
     }
 
-    public static function emailExists($email) 
+    public static function emailExists($email)
     {
         $pdo = Database::getConnection();
         $stmt = $pdo->prepare("SELECT 1 FROM users WHERE email = ?");
@@ -103,7 +103,7 @@ class User extends Model
     {
         $pdo = Database::getConnection();
 
-        if($password)
+        if ($password)
         {
             $hash = password_hash($password, PASSWORD_BCRYPT);
             $stmt = $pdo->prepare("UPDATE " . self::$table . " SET role_id = :role_id, username = :username, full_name = :full_name, 
@@ -140,11 +140,11 @@ class User extends Model
 
         $stmt = $pdo->prepare("DELETE FROM " . self::$table . " WHERE id = :id");
         $result = $stmt->execute([':id' => $id]);
-        
+
         return $result && $stmt->rowCount() > 0;
     }
 
-    public function verifyPassword(string $password): bool 
+    public function verifyPassword(string $password): bool
     {
         return password_verify($password, $this->password_hash);
     }

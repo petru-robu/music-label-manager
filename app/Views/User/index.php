@@ -23,6 +23,8 @@
             <td>
                 <a href="/users/edit?id=<?php echo $user['id']; ?>">Edit</a>
                 <a href="/users/delete?id=<?php echo $user['id']; ?>" onclick="return confirm('Are you sure you want to delete this user?');">Delete</a>
+                <a href="/users/<?= $user['id']?>/report" target="_blank">Generate PDF</a>
+
             </td>
         </tr>
     <?php endforeach; ?>

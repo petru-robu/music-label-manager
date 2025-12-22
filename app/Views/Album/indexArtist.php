@@ -8,11 +8,10 @@
     $user = User::getUserById($user_id);    
 ?>
 
-<h2>Releases from <span style="color: grey"><?php echo $user->full_name ?></span></h2>
+<h2>Releases from <span style="color: grey"><?php echo htmlspecialchars($user->full_name, ENT_QUOTES, 'UTF-8'); ?></span></h2>
 
 <a href="/dashboard">Back to dashboard</a> <br/>
-<a href="/artist/<?= $artist->id ?>/album/create">Create a new album </a>
-
+<a href="/artist/<?= $artist->id ?>/album/create">Create a new album</a>
 
 <table class="table">
     <thead>
@@ -22,6 +21,7 @@
             <th>Title</th>
             <th>Release Year</th>
             <th>Genre</th>
+            <th>View</th>
             <th>Edit</th>
             <th>Delete</th>
             <th>Songs</th>
@@ -30,16 +30,19 @@
     <tbody>
         <?php foreach ($albums as $album): ?>
             <tr>
-                <td><?php echo htmlspecialchars($album['id'], ENT_QUOTES, 'UTF-8'); ?></td>
-                <td><?php echo htmlspecialchars($album['artist_id'], ENT_QUOTES, 'UTF-8'); ?></td>
-                <td><?php echo htmlspecialchars($album['title'], ENT_QUOTES, 'UTF-8'); ?></td>
-                <td><?php echo htmlspecialchars($album['release_year'], ENT_QUOTES, 'UTF-8'); ?></td>
-                <td><?php echo htmlspecialchars($album['genre'], ENT_QUOTES, 'UTF-8'); ?></td>
+                <td><?= htmlspecialchars($album['id'], ENT_QUOTES, 'UTF-8'); ?></td>
+                <td><?= htmlspecialchars($album['artist_id'], ENT_QUOTES, 'UTF-8'); ?></td>
+                <td><?= htmlspecialchars($album['title'], ENT_QUOTES, 'UTF-8'); ?></td>
+                <td><?= htmlspecialchars($album['release_year'], ENT_QUOTES, 'UTF-8'); ?></td>
+                <td><?= htmlspecialchars($album['genre'], ENT_QUOTES, 'UTF-8'); ?></td>
+                <td><a href="/artist/<?= $artist_id ?>/album/<?= $album['id'] ?>/view">View</a></td>
                 <td><a href="/artist/<?= $artist_id ?>/album/<?= $album['id'] ?>/edit">Edit</a></td>
-                <td><a href="/artist/<?= $artist_id ?>/album/<?= $album['id'] ?>/delete"
-                        onclick="return confirm('Are you sure you want to delete this album?');">
+                <td>
+                    <a href="/artist/<?= $artist_id ?>/album/<?= $album['id'] ?>/delete"
+                       onclick="return confirm('Are you sure you want to delete this album?');">
                         Delete
-                    </a></td>
+                    </a>
+                </td>
                 <td><a href="/artist/<?= $artist_id ?>/album/<?= $album['id'] ?>/song">Songs</a></td>
             </tr>
         <?php endforeach; ?>

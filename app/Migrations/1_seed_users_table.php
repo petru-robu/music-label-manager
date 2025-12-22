@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/../Database.php';
 
-return new class 
+return new class
 {
     public function up()
     {
@@ -16,6 +16,9 @@ return new class
                 'full_name' => 'Administrator',
                 'password_hash' => password_hash('1234', PASSWORD_DEFAULT),
             ],
+
+
+            // artists
             [
                 'role_id' => 2,
                 'username' => 'user1',
@@ -97,21 +100,21 @@ return new class
 
             // producers
             [
-                'role_id' => 2,
+                'role_id' => 4,
                 'username' => 'rickrubin',
                 'email' => 'rickrubin@example.com',
                 'full_name' => 'Rick Rubin',
                 'password_hash' => password_hash('1234', PASSWORD_DEFAULT),
             ],
             [
-                'role_id' => 2,
+                'role_id' => 4,
                 'username' => 'pharell',
                 'email' => 'pharell@example.com',
                 'full_name' => 'Pharell Williams',
                 'password_hash' => password_hash('1234', PASSWORD_DEFAULT),
             ],
             [
-                'role_id' => 2,
+                'role_id' => 4,
                 'username' => 'timbaland',
                 'email' => 'timbaland@example.com',
                 'full_name' => 'Timbaland',
@@ -126,7 +129,8 @@ return new class
             VALUES (:role_id, :username, :email, :full_name, :password_hash)
         ");
 
-        foreach ($users as $user) {
+        foreach ($users as $user)
+        {
             $stmt->execute($user);
         }
     }
@@ -134,9 +138,9 @@ return new class
     public function down()
     {
         $pdo = Database::getConnection();
-        
+
         $emails = ['admin@example.com', 'user1@example.com'];
-        $in  = str_repeat('?,', count($emails) - 1) . '?';
+        $in = str_repeat('?,', count($emails) - 1) . '?';
         $stmt = $pdo->prepare("DELETE FROM users WHERE email IN ($in)");
         $stmt->execute($emails);
     }

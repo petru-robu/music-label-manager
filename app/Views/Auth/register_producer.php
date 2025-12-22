@@ -1,4 +1,4 @@
-<h2>Register</h2>
+<h2>Register as a Producer</h2>
 
 <?php if (!empty($error)): ?>
     <div class="alert alert-error"><?= $error ?></div>
@@ -8,11 +8,17 @@
     <div class="alert alert-success"><?= $success ?></div>
 <?php endif; ?>
 
-<form method="POST" action="/register">
+<form method="POST" action="/register_producer">
+
+    <p>User account information:</p>
     <input type="text" name="username" placeholder="Username" required>
     <input type="text" name="full_name" placeholder="Full Name" required>
     <input type="email" name="email" placeholder="Email" required>
     <input type="password" name="password" placeholder="Password" required>
+
+    <p>Producer information:</p>
+    <input type="text" name="studio_name" placeholder="Studio name" required>
+    <input type="text" name="bio" placeholder="Biography" required>
 
     <div style="margin-top:10px;">
         <img src="/captcha.php" alt="CAPTCHA">

@@ -21,9 +21,9 @@ class AnalyticsController extends Controller
         $topPages = Analytics::getTopPages();
 
         $this->render('Analytics/index', [
-            'totals'      => $totals,
+            'totals' => $totals,
             'viewsPerDay' => $viewsPerDay,
-            'topPages'    => $topPages,
+            'topPages' => $topPages,
         ]);
     }
 

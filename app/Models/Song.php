@@ -14,11 +14,12 @@ class Song extends Model
 
     public function __construct(array $data = [])
     {
-        if (!empty($data)) {
-            $this->id = (int) ($data['id'] ?? 0);
-            $this->album_id = (int) ($data['album_id'] ?? 0);
+        if (!empty($data))
+        {
+            $this->id = (int)($data['id'] ?? 0);
+            $this->album_id = (int)($data['album_id'] ?? 0);
             $this->title = $data['title'] ?? '';
-            $this->duration = isset($data['duration']) ? (int) $data['duration'] : null;
+            $this->duration = isset($data['duration']) ? (int)$data['duration'] : null;
             $this->created_at = $data['created_at'] ?? null;
             $this->updated_at = $data['updated_at'] ?? null;
         }
@@ -51,7 +52,7 @@ class Song extends Model
             ':duration' => $duration
         ]);
 
-        return (int) $pdo->lastInsertId();
+        return (int)$pdo->lastInsertId();
     }
 
     public static function updateSong(int $id, string $title, ?int $duration = null): bool
@@ -93,7 +94,8 @@ class Song extends Model
         $pdo = Database::getConnection();
 
         $stmt = $pdo->query("SELECT * FROM " . self::$table);
-        if ($stmt === false) {
+        if ($stmt === false)
+        {
             return [];
         }
 

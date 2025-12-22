@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/../Database.php';
 
-return new class 
+return new class
 {
     public function up()
     {
