@@ -30,7 +30,7 @@ class AlbumController extends Controller
             echo "Unauthorized.";
             return;
         }
-
+        
         // Get the artist for the logged-in user
         $artist = Artist::getByUserId($user_id);
         if (!$artist || $artist->id != (int)$artist_id)
