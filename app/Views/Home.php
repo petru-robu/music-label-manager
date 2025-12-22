@@ -15,7 +15,7 @@
 <div>
     Are you a listener? <a href="/register">Create listener account</a> <br />
     Are you an artist? <a href="/register_artist">Create artist account</a> <br />
-    Are you a producer? <a href="/register_artist">Create producer account</a> <br />
+    Are you a producer? <a href="/register_producer">Create producer account</a> <br />
 
     If you already have an account, <a href="/login">login</a>.
 </div>

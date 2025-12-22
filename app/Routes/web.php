@@ -13,20 +13,25 @@ $router->get('/songs', 'SongController@index');
 $router->match(['GET', 'POST'], '/login', 'AuthController@login');
 $router->match(['GET', 'POST'], '/register', 'AuthController@register');
 $router->match(['GET', 'POST'], '/register_artist', 'AuthController@register_artist');
+$router->match(['GET', 'POST'], '/register_producer', 'AuthController@register_producer');
 $router->post('/logout', 'AuthController@logout');
+
 
 // dashboard (for logged in users)
 $router->get('/user/dashboard', ['view' => 'Dashboard/listener'], ['Auth', 'Role:3']);
 $router->get('/artist/dashboard', ['view' => 'Dashboard/artist'], ['Auth', 'Role:2']);
 $router->get('/admin/dashboard', ['view' => 'Dashboard/admin'], ['Auth', 'Role:1']);
-$router->get('/dashboard', function () {
+$router->get('/producer/dashboard', ['view' => 'Dashboard/producer'], ['Auth', 'Role:4']);
+$router->get('/dashboard', function ()
+{
     // redirects to the right route for the logged in user or to login otherwise
-    if (!isset($_SESSION['user_id'])) {
+    if (!isset($_SESSION['user_id']))
+    {
         header('Location: /login');
         exit;
     }
     $role = $_SESSION['role'];
-    $routes = [1 => '/admin/dashboard', 2 => '/artist/dashboard', 3 => '/user/dashboard'];
+    $routes = [1 => '/admin/dashboard', 2 => '/artist/dashboard', 3 => '/user/dashboard', 4 => '/producer/dashboard'];
     header('Location: ' . ($routes[$role] ?? '/login'));
     exit;
 }, ['Auth']);
@@ -51,6 +56,14 @@ $router->get('/artist/:artist_id/album/:album_id/edit', 'AlbumController@edit', 
 $router->post('/artist/:artist_id/album/:album_id/update', 'AlbumController@update', ['Auth', 'Role:2']);
 
 $router->get('/artist/:artist_id/album/:album_id/delete', 'AlbumController@delete', ['Auth', 'Role:2']);
+
+$router->get('/artist/:artist_id/album/:album_id/view', 'AlbumController@view', ['Auth', 'Role:2']);
+
+
+
+// report
+$router->get('/users/:id/report', 'UserController@generateReport', ['Auth', 'Role:1']);
+
 
 // song management routes for artists only
 $router->get(

@@ -2,6 +2,7 @@
     "require": {
         "vlucas/phpdotenv": "^5.5",
         "maantje/charts": "^0.8.1",
-        "phpmailer/phpmailer": "^7.0"
+        "phpmailer/phpmailer": "^7.0",
+        "setasign/fpdf": "^1.8"
     }
 }

@@ -6,17 +6,20 @@ class AnalyticsTracker
 {
     public static function track(): void
     {
-        if (php_sapi_name() === 'cli') {
+        if (php_sapi_name() === 'cli')
+        {
             return;
         }
 
         $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
-        if (preg_match('/bot|crawl|spider|slurp|bing|google/i', $ua)) {
+        if (preg_match('/bot|crawl|spider|slurp|bing|google/i', $ua))
+        {
             return;
         }
 
         $pdo = Database::getConnection();
-        if (!$pdo) {
+        if (!$pdo)
+        {
             return;
         }
 
@@ -39,7 +42,8 @@ class AnalyticsTracker
             ':page' => $page,
         ]);
 
-        if (!$stmt->fetchColumn()) {
+        if (!$stmt->fetchColumn())
+        {
             $sql = "
                 INSERT INTO analytics_visits (page, ip, user_agent, referrer)
                 VALUES (:page, :ip, :ua, :ref)

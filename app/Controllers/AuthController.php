@@ -3,42 +3,118 @@
 require_once __DIR__ . '/Controller.php';
 require_once __DIR__ . '/../Models/User.php';
 require_once __DIR__ . '/../Models/Artist.php';
+require_once __DIR__ . '/../Models/Producer.php';
 require_once __DIR__ . '/../Services/MailService.php';
 
 class AuthController extends Controller
 {
     private $userModel;
+    private $mailService;
 
     public function __construct()
     {
-        $this->userModel = new User;
+        $this->userModel = new User();
+
         if (session_status() === PHP_SESSION_NONE)
         {
             session_start();
         }
+
+        $this->mailService = new MailService();
     }
 
-    private function setError($message)
+    // session/error helpers
+    private function setError(string $message)
     {
         $_SESSION['error'] = $message;
     }
 
-    private function getError()
+    private function getError(): ?string
     {
         $error = $_SESSION['error'] ?? null;
         unset($_SESSION['error']);
         return $error;
     }
 
+    private function renderWithError(string $view, array $extra = [])
+    {
+        $error = $this->getError();
+        return $this->render($view, array_merge($extra, ['error' => $error]));
+    }
+
+    // captcha
+    private function validateCaptcha(string $input): bool
+    {
+        return !empty($input) && $input === ($_SESSION['captcha'] ?? '');
+    }
+
+    /* ---------- User & Profile Creation ---------- */
+    private function checkUsernameEmail(string $username, string $email): bool
+    {
+        if ($this->userModel->usernameExists($username))
+        {
+            $this->setError('Username already exists!');
+            return false;
+        }
+        if ($this->userModel->emailExists($email))
+        {
+            $this->setError('Email already exists!');
+            return false;
+        }
+        return true;
+    }
+
+    private function createUserAndProfile(
+        string $username,
+        string $full_name,
+        string $email,
+        string $password,
+        int $role,
+        ?callable $profileCreator = null
+    ): ?int {
+        $user_id = $this->userModel->createUser($username, $full_name, $email, $password, $role);
+        if (!$user_id)
+        {
+            $this->setError('Failed to create user account.');
+            return null;
+        }
+
+        if ($profileCreator)
+        {
+            $profile_id = $profileCreator($user_id);
+            if (!$profile_id)
+            {
+                $this->userModel->deleteUser($user_id);
+                $this->setError('Failed to create profile.');
+                return null;
+            }
+        }
+
+        // send welcome email safely
+        try
+        {
+            $this->mailService->send($email, 'Welcome', 'Thanks for registering.');
+        }
+        catch (\Throwable $e)
+        {
+            if ($profileCreator)
+                $profileCreator = null; // rollback if needed
+            $this->userModel->deleteUser($user_id);
+            $this->setError('Registration failed: email service error.');
+            return null;
+        }
+
+        return $user_id;
+    }
+
+    // actions
     public function login()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'GET')
         {
-            $error = $this->getError();
-            return $this->render('Auth/login', ['error' => $error]);
+            return $this->renderWithError('Auth/login');
         }
 
-        // POST request
         $email = $_POST['email'] ?? '';
         $password = $_POST['password'] ?? '';
 
@@ -60,51 +136,41 @@ class AuthController extends Controller
         exit;
     }
 
+    public function logout()
+    {
+        session_destroy();
+        header('Location: /login');
+        exit;
+    }
+
     public function register()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'GET')
         {
-            $error = $this->getError();
-            return $this->render('Auth/register', ['error' => $error]);
+            return $this->renderWithError('Auth/register');
         }
 
-        // Validate CAPTCHA
-        $captcha = $_POST['captcha'] ?? '';
-        if (empty($captcha) || $captcha !== ($_SESSION['captcha'] ?? ''))
+        if (!$this->validateCaptcha($_POST['captcha'] ?? ''))
         {
             $this->setError('Invalid captcha!');
-            return $this->render('Auth/register', ['error' => $this->getError()]);
+            return $this->renderWithError('Auth/register');
         }
 
         $username = trim($_POST['username'] ?? '');
         $full_name = trim($_POST['full_name'] ?? '');
         $email = trim($_POST['email'] ?? '');
         $password = trim($_POST['password'] ?? '');
-        $role = 1;
+        $role = 3; // normal listener
 
-        if ($this->userModel->usernameExists($username))
+        if (!$this->checkUsernameEmail($username, $email))
         {
-            $this->setError('Username already exists!');
-            return $this->render('Auth/register', ['error' => $this->getError()]);
+            return $this->renderWithError('Auth/register');
         }
 
-        if ($this->userModel->emailExists($email))
-        {
-            $this->setError('Email already exists!');
-            return $this->render('Auth/register', ['error' => $this->getError()]);
-        }
+        $user_id = $this->createUserAndProfile($username, $full_name, $email, $password, $role);
+        if (!$user_id)
+            return $this->renderWithError('Auth/register');
 
-        if (!$this->userModel->createUser($username, $full_name, $email, $password, $role))
-        {
-            $this->setError('Registration failed!');
-            return $this->render('Auth/register', ['error' => $this->getError()]);
-        }
-
-        // Send welcome email
-        $mailService = new MailService();
-        $mailService->send($email, 'Welcome', 'Thanks for registering.');
-
-        // Render same page with success message
         return $this->render('Auth/register', [
             'success' => 'Registration successful! You can now log in. <br> Log in <a href="/login">here</a>.'
         ]);
@@ -114,85 +180,113 @@ class AuthController extends Controller
     {
         if ($_SERVER['REQUEST_METHOD'] === 'GET')
         {
-            $error = $this->getError();
             $success = $_SESSION['success'] ?? '';
             unset($_SESSION['success']);
-
             return $this->render('Auth/register_artist', [
-                'error' => $error,
+                'error' => $this->getError(),
                 'success' => $success
             ]);
         }
 
-        // Validate CAPTCHA
-        $captcha = $_POST['captcha'] ?? '';
-        if (empty($captcha) || $captcha !== ($_SESSION['captcha'] ?? ''))
+        if (!$this->validateCaptcha($_POST['captcha'] ?? ''))
         {
             $this->setError('Invalid CAPTCHA!');
-            return $this->render('Auth/register_artist', ['error' => $this->getError()]);
+            return $this->renderWithError('Auth/register_artist');
         }
 
-        // Get form inputs
         $username = trim($_POST['username'] ?? '');
         $full_name = trim($_POST['full_name'] ?? '');
         $email = trim($_POST['email'] ?? '');
         $password = trim($_POST['password'] ?? '');
-        $role = 2;
-
         $stage_name = trim($_POST['stage_name'] ?? '');
         $bio = trim($_POST['bio'] ?? '');
+        $role = 2; // artist role
 
-        // Validate required fields
         if (!$username || !$full_name || !$email || !$password || !$stage_name)
         {
             $this->setError('Please fill in all required fields.');
-            return $this->render('Auth/register_artist', ['error' => $this->getError()]);
+            return $this->renderWithError('Auth/register_artist');
         }
 
-        if ($this->userModel->usernameExists($username))
+        if (!$this->checkUsernameEmail($username, $email))
         {
-            $this->setError('Username already exists!');
-            return $this->render('Auth/register_artist', ['error' => $this->getError()]);
+            return $this->renderWithError('Auth/register_artist');
         }
 
-        if ($this->userModel->emailExists($email))
-        {
-            $this->setError('Email already exists!');
-            return $this->render('Auth/register_artist', ['error' => $this->getError()]);
-        }
+        $user_id = $this->createUserAndProfile(
+            $username,
+            $full_name,
+            $email,
+            $password,
+            $role,
+            fn($uid) => Artist::createArtist($uid, $stage_name, $bio)
+        );
 
-        // Create user
-        $user_id = $this->userModel->createUser($username, $full_name, $email, $password, $role);
         if (!$user_id)
-        {
-            $this->setError('Failed to create user account.');
-            return $this->render('Auth/register_artist', ['error' => $this->getError()]);
-        }
+            return $this->renderWithError('Auth/register_artist');
 
-        // Create artist
-        $artist_id = Artist::createArtist($user_id, $stage_name, $bio);
-        if (!$artist_id)
-        {
-            $this->userModel->deleteUser($user_id);
-            $this->setError('Failed to create artist profile.');
-            return $this->render('Auth/register_artist', ['error' => $this->getError()]);
-        }
-
-        // Send welcome email
-        $mailService = new MailService();
-        $mailService->send($email, 'Welcome', 'Thanks for registering.');
-
-        // Render same page with success message
         return $this->render('Auth/register', [
             'success' => 'Registration successful! You can now log in.<br /> Log in <a href="/login">here</a>.'
         ]);
     }
 
-
-    public function logout()
+    public function register_producer()
     {
-        session_destroy();
-        header("Location: /login");
-        exit;
+        if ($_SERVER['REQUEST_METHOD'] === 'GET')
+        {
+            $success = $_SESSION['success'] ?? '';
+            unset($_SESSION['success']);
+            return $this->render('Auth/register_producer', [
+                'error' => $this->getError(),
+                'success' => $success
+            ]);
+        }
+
+        if (!$this->validateCaptcha($_POST['captcha'] ?? ''))
+        {
+            $this->setError('Invalid CAPTCHA!');
+            return $this->renderWithError('Auth/register_producer');
+        }
+
+        $username = trim($_POST['username'] ?? '');
+        $full_name = trim($_POST['full_name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $password = trim($_POST['password'] ?? '');
+        $studio_name = trim($_POST['studio_name'] ?? '');
+        $bio = trim($_POST['bio'] ?? '');
+        $role = 4; //producer role
+
+        if (!$username || !$full_name || !$email || !$password || !$studio_name)
+        {
+            $this->setError('Please fill in all required fields.');
+            return $this->renderWithError('Auth/register_producer');
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL))
+        {
+            $this->setError('Please enter a valid email address.');
+            return $this->renderWithError('Auth/register_producer');
+        }
+
+        if (!$this->checkUsernameEmail($username, $email))
+        {
+            return $this->renderWithError('Auth/register_producer');
+        }
+
+        $user_id = $this->createUserAndProfile(
+            $username,
+            $full_name,
+            $email,
+            $password,
+            $role,
+            fn($uid) => Producer::createProducer($uid, $studio_name, $bio)
+        );
+
+        if (!$user_id)
+            return $this->renderWithError('Auth/register_producer');
+
+        return $this->render('Auth/register', [
+            'success' => 'Registration successful! You can now log in.<br /> Log in <a href="/login">here</a>.'
+        ]);
     }
 }

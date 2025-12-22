@@ -22,7 +22,7 @@ class MailService
         $this->mail->Username = $_ENV['SMTP_USER'];
         $this->mail->Password = $_ENV['SMTP_PASS'];
         $this->mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $this->mail->Port = 587;    
+        $this->mail->Port = 587;
 
         // var_dump($this->mail->Username);
         // var_dump($this->mail->Password);

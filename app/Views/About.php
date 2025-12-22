@@ -104,11 +104,11 @@
 </p>
 
 <p>
-    Application flow: <br/>
-    <img src="" alt="App flow"/>
+    <strong>Application flow: </strong><br/> <br/>
+    <img src="/img/appflow.png" alt="App flow" style="width:700px; height:auto;"/>
 </p>
-
+<br/> <br/> <br/> 
 <p>
-    Database: <br/>
-    <img src="" alt="Database"/>
+    <strong>Database: </strong><br/> <br/>
+    <img src="/img/db.png" alt="Database"/>
 </p>

@@ -12,97 +12,135 @@ class ArtistController extends Controller
         $this->artistModel = new Artist();
     }
 
+    // helpers
+    private function requireUser()
+    {
+        $user_id = $_SESSION['user_id'] ?? null;
+        if (!$user_id)
+        {
+            http_response_code(403);
+            echo "Unauthorized.";
+            return null;
+        }
+        return (int)$user_id;
+    }
+
+    private function requireArtistOwner($artist_id)
+    {
+        $user_id = $this->requireUser();
+        if (!$user_id)
+            return null;
+
+        $artist = $this->artistModel->getArtistById((int)$artist_id);
+        if (!$artist || (int)$artist->user_id !== $user_id)
+        {
+            http_response_code(403);
+            echo "Unauthorized artist.";
+            return null;
+        }
+
+        return $artist;
+    }
+
+    private function getRequestId()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST')
+        {
+            return $_POST['id'] ?? null;
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'GET')
+        {
+            return $_GET['id'] ?? null;
+        }
+        return null;
+    }
+
+    private function redirectIndex()
+    {
+        header('Location: /artists');
+        exit;
+    }
+
+    // actions
     public function index()
     {
-        // returns a view of all artists
+        if (!$this->requireUser())
+            return;
+
         $artists = $this->artistModel->getAll();
         $this->render('Artist/index', ['artists' => $artists]);
     }
 
-    public function delete()
+    public function edit()
     {
-        // deletes an artist
-        // check deletion route
-        if ($_SERVER['REQUEST_METHOD'] === 'GET')
-            $id = $_GET['id'] ?? null;
-        else if ($_SERVER['REQUEST_METHOD'] === 'POST')
-            $id = $_POST['id'] ?? null;
-        else {
-            echo 'Invalid request.';
-            exit;
-        }
-
-        if (!$id) {
+        $id = $this->getRequestId();
+        if (!$id)
+        {
             http_response_code(400);
             echo "Bad Request: Artist ID is required.";
             return;
         }
 
-        $id = (int) $id;
-        $deleted = $this->artistModel->deleteArtist($id);
-        if ($deleted) {
-            header('Location: /artists');
-            exit;
-        } else {
-            http_response_code(404);
-            echo "Artist not found or could not be deleted.";
-        }
+        if (!$artist = $this->requireArtistOwner($id))
+            return;
+
+        $this->render('Artist/edit', ['artist' => $artist]);
     }
 
     public function update()
     {
-        // update an artist
+        if (!$this->requireUser())
+            return;
+
         $id = $_POST['id'] ?? null;
-        $user_id = $_POST['user_id'] ?? null;
         $stage_name = $_POST['stage_name'] ?? null;
         $bio = $_POST['bio'] ?? '';
 
-        if (!$id || !$user_id || !$stage_name) {
+        if (!$id || !$stage_name)
+        {
             http_response_code(400);
             echo "Bad Request: Missing required fields.";
             return;
         }
 
-        $id = (int) $id;
-        $user_id = (int) $user_id;
-
-        $artist = $this->artistModel->getArtistById($id);
-
-        if (!$artist) {
-            http_response_code(404);
-            echo "Artist not found.";
+        if (!$artist = $this->requireArtistOwner($id))
             return;
+
+        $updated = $this->artistModel->updateArtist(
+            $artist->id,
+            $artist->user_id,
+            $stage_name,
+            $bio
+        );
+
+        if ($updated)
+        {
+            $this->redirectIndex();
         }
 
-        $updated = $this->artistModel->updateArtist($id, $user_id, $stage_name, $bio);
-
-        if ($updated) {
-            header('Location: /artists');
-            exit;
-        } else {
-            http_response_code(500);
-            echo "Failed to update artist.";
-        }
+        http_response_code(500);
+        echo "Failed to update artist.";
     }
 
-    public function edit()
+    public function delete()
     {
-        $id = $_GET['id'] ?? null;
-
-        if (!$id) {
+        $id = $this->getRequestId();
+        if (!$id)
+        {
             http_response_code(400);
             echo "Bad Request: Artist ID is required.";
             return;
         }
 
-        $id = (int) $id;
-        $artist = $this->artistModel->getArtistById($id);
-        if (!$artist) {
-            http_response_code(404);
-            echo "Artist not found.";
+        if (!$artist = $this->requireArtistOwner($id))
             return;
+
+        if ($this->artistModel->deleteArtist($artist->id))
+        {
+            $this->redirectIndex();
         }
 
-        $this->render('Artist/edit', ['artist' => $artist]);
+        http_response_code(404);
+        echo "Artist not found or could not be deleted.";
     }
 }

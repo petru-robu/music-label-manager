@@ -30,6 +30,15 @@ class ContactController extends Controller
             exit;
         }
 
+        // CAPTCHA check
+        $captcha = $_POST['captcha'] ?? '';
+        if (empty($captcha) || $captcha !== ($_SESSION['captcha'] ?? ''))
+        {
+            $_SESSION['error'] = 'Invalid captcha!';
+            header('Location: /contact');
+            exit;
+        }
+
         try
         {
             $mailService = new MailService();
@@ -44,5 +53,6 @@ class ContactController extends Controller
         header('Location: /contact');
         exit;
     }
+
 
 }

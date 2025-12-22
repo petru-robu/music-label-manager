@@ -30,5 +30,10 @@
         <textarea name="message" required></textarea>
     </label>
 
+    <div style="margin-top:10px;">
+        <img src="/captcha.php" alt="CAPTCHA">
+        <input type="text" name="captcha" placeholder="Enter CAPTCHA" required style="display:block; margin-top:5px;">
+    </div>
+
     <button type="submit">Send</button>
 </form>

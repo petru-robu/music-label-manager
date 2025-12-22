@@ -147,7 +147,7 @@ input, select, textarea {
 }
 
 .site-footer {
-    background-color: #1f2933;
+    background-color: var(--accent-color);
     color: #e5e7eb;
     padding: 16px 24px;
     font-size: 14px;

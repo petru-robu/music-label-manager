@@ -8,7 +8,8 @@ class Role
         $userRole = $_SESSION['role'] ?? null;
         $userRole = "{$userRole}";
 
-        if ($userRole !== $requiredRole) {
+        if ($userRole !== $requiredRole)
+        {
             http_response_code(403);
             echo "Access denied! You don't have the role for this!";
             exit;

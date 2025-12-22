@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__.'/Model.php';
+require_once __DIR__ . '/Model.php';
 
 class Album extends Model
 {
@@ -15,7 +15,7 @@ class Album extends Model
 
     public function __construct(array $data = [])
     {
-        if (!empty($data)) 
+        if (!empty($data))
         {
             $this->id = (int)($data['id'] ?? 0);
             $this->artist_id = (int)($data['artist_id'] ?? 0);
@@ -84,7 +84,8 @@ class Album extends Model
         $pdo = Database::getConnection();
 
         $stmt = $pdo->query("SELECT * FROM " . self::$table);
-        if ($stmt === false) {
+        if ($stmt === false)
+        {
             return [];
         }
 

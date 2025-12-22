@@ -1,0 +1,29 @@
+<h2>Register as a Producer</h2>
+
+<?php if (!empty($error)): ?>
+    <div class="alert alert-error"><?= $error ?></div>
+<?php endif; ?>
+
+<?php if (!empty($success)): ?>
+    <div class="alert alert-success"><?= $success ?></div>
+<?php endif; ?>
+
+<form method="POST" action="/register_producer">
+
+    <p>User account information:</p>
+    <input type="text" name="username" placeholder="Username" required>
+    <input type="text" name="full_name" placeholder="Full Name" required>
+    <input type="email" name="email" placeholder="Email" required>
+    <input type="password" name="password" placeholder="Password" required>
+
+    <p>Producer information:</p>
+    <input type="text" name="studio_name" placeholder="Studio name" required>
+    <input type="text" name="bio" placeholder="Biography" required>
+
+    <div style="margin-top:10px;">
+        <img src="/captcha.php" alt="CAPTCHA">
+        <input type="text" name="captcha" placeholder="Enter CAPTCHA" required style="display:block; margin-top:5px;">
+    </div>
+
+    <button type="submit">Register</button>
+</form>

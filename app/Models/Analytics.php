@@ -14,8 +14,9 @@ class Analytics extends Model
 
     public function __construct(array $data = [])
     {
-        if (!empty($data)) {
-            $this->id = (int) ($data['id'] ?? 0);
+        if (!empty($data))
+        {
+            $this->id = (int)($data['id'] ?? 0);
             $this->page = $data['page'] ?? '';
             $this->ip = $data['ip'] ?? '';
             $this->user_agent = $data['user_agent'] ?? null;
