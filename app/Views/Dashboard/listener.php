@@ -31,8 +31,9 @@ if ($isLoggedIn)
 
 <div>
     <a href="/profile/edit">Edit profile</a> <br />
-    <a href="/artists">Browse Artists</a> <br/>
-    <a href="/producers">Browse Producers</a> <br/>
     <a href="/albums">Browse Albums</a> <br/>
-    <a href="/songs">Browse Songs</a>
+    <a href="/songs">Browse Songs</a> <br/>
+    <a href="/artists">Browse Artists</a> <br/>
+    <a href="/productions">Browse Productions</a>
+    
 </div>

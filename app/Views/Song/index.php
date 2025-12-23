@@ -3,9 +3,9 @@
 <table class="table" id="songTable">
     <thead>
         <tr>
-            <th onclick="sortTable(0)">Title &#x25B2;&#x25BC;</th>
-            <th onclick="sortTable(1)">Artist &#x25B2;&#x25BC;</th>
-            <th onclick="sortTable(2)">Year &#x25B2;&#x25BC;</th>
+            <th onclick="sortTable(0)">Title <span class="sort-arrows">&#x25B2;&#x25BC;</span></th>
+            <th onclick="sortTable(1)">Artist <span class="sort-arrows">&#x25B2;&#x25BC;</span></th>
+            <th onclick="sortTable(2)">Year <span class="sort-arrows">&#x25B2;&#x25BC;</span></th>
         </tr>
     </thead>
     <tbody>

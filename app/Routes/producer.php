@@ -9,3 +9,6 @@ $router->get('/producer/:producer_id/album', 'ProducerAlbumController@index', ['
 
 // Delete a production
 $router->get('/producer/:producer_id/album/:id/delete', 'ProducerAlbumController@delete', ['Auth', 'Role:4']);
+
+// View productions
+$router->get('/productions', 'ProducerAlbumController@indexAll', ['Auth', 'Role:3']);

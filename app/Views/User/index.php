@@ -16,7 +16,7 @@ foreach ($users as $user)
 
 <h2>User List</h2>
 <a href="/dashboard">Back to dashboard</a>
-<br/>
+<br />
 
 <?php foreach ($roles as $roleId => $roleName): ?>
     <h3><?= htmlspecialchars($roleName) ?></h3>
@@ -50,12 +50,12 @@ foreach ($users as $user)
                         <a href="/users/delete?id=<?= $user['id'] ?>"
                             onclick="return confirm('Are you sure you want to delete this user?');">
                             Delete
-                        </a>
-                        <a href="/users/<?= $user['id'] ?>/report" target="_blank">Generate PDF</a>
+                        </a> <br />
+                        <a href="/users/<?= $user['id'] ?>/report" target="_blank">Report</a>
                     </td>
                 </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
-    <br/>
+    <br />
 <?php endforeach; ?>

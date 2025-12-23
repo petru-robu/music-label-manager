@@ -95,6 +95,23 @@ class ProducerAlbum extends Model
         return $stmt->rowCount() > 0;
     }
 
+    public static function getAllWithNames(): array
+    {
+        $pdo = Database::getConnection();
 
+        $sql = "
+            SELECT pa.id, pa.created_at,
+                p.id AS producer_id, p.studio_name,
+                a.stage_name AS artist_name,
+                al.title AS album_title
+            FROM producer_album pa
+            JOIN producers p ON pa.producer_id = p.id
+            JOIN artists a ON pa.artist_id = a.id
+            JOIN albums al ON pa.album_id = al.id
+            ORDER BY pa.created_at DESC
+        ";
+
+        return $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+    }
 
 }

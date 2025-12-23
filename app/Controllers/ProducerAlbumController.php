@@ -107,4 +107,14 @@ class ProducerAlbumController extends Controller
         http_response_code(404);
         echo "Production not found or could not be deleted.";
     }
+
+    public function indexAll()
+    {
+        $productions = ProducerAlbum::getAllWithNames();
+
+        $this->render('ProducerAlbum/index_all', [
+            'productions' => $productions
+        ]);
+    }
+
 }

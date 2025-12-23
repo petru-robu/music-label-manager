@@ -53,6 +53,31 @@ class AlbumController extends Controller
         return $album;
     }
 
+    private function validateReleaseYear($year)
+    {
+        if ($year === null || $year === '')
+        {
+            return null; // allow null
+        }
+
+        if (!is_numeric($year))
+        {
+            return false;
+        }
+
+        $year = (int)$year;
+        $currentYear = (int)date('Y');
+
+        // MySQL YEAR safe range: 1901–2155 (or adjust to your needs)
+        if ($year < 1901 || $year > $currentYear + 1)
+        {
+            return false;
+        }
+
+        return $year;
+    }
+
+
     // CONTROLLER ACTIONS
     public function index()
     {
@@ -119,8 +144,17 @@ class AlbumController extends Controller
             return;
 
         $title = $_POST['title'] ?? null;
-        $release_year = $_POST['release_year'] ?? null;
         $genre = $_POST['genre'] ?? '';
+        $release_year_raw = $_POST['release_year'] ?? null;
+        $release_year = $this->validateReleaseYear($release_year_raw);
+
+        if ($release_year === false)
+        {
+            http_response_code(400);
+            echo "Invalid release year. Please enter a valid year.";
+            return;
+        }
+
 
         if (!$title)
         {
@@ -228,8 +262,17 @@ class AlbumController extends Controller
 
         $artist_id = $artist->id;
         $title = $_POST['title'] ?? null;
-        $release_year = $_POST['release_year'] ?? null;
         $genre = $_POST['genre'] ?? '';
+
+        $release_year_raw = $_POST['release_year'] ?? null;
+        $release_year = $this->validateReleaseYear($release_year_raw);
+
+        if ($release_year === false)
+        {
+            http_response_code(400);
+            echo "Invalid release year. Please enter a year between 1901 and " . (date('Y') + 1) . ".";
+            return;
+        }
 
         if (!$artist_id || !$title)
         {
