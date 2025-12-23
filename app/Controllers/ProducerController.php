@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/Controller.php';
 require_once __DIR__ . '/../Models/Producer.php';
+require_once __DIR__ . '/../Models/User.php';
 
 class ProducerController extends Controller
 {
@@ -12,26 +13,39 @@ class ProducerController extends Controller
         $this->producerModel = new Producer();
     }
 
+    // HELPERS
+    private function getProducerOrFail(int $id)
+    {
+        $producer = $this->producerModel->getProducerById($id);
+        if (!$producer)
+        {
+            http_response_code(404);
+            echo "Producer not found.";
+            exit;
+        }
+        return $producer;
+    }
+
+    private function requirePost()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST')
+        {
+            http_response_code(405);
+            echo "Method not allowed.";
+            exit;
+        }
+    }
+
+    // CONTROLLER ACTIONS
     public function index()
     {
-        // returns a view of all producers
         $producers = $this->producerModel->getAll();
         $this->render('Producer/index', ['producers' => $producers]);
     }
 
     public function delete()
     {
-        // deletes a producer
-        if ($_SERVER['REQUEST_METHOD'] === 'GET')
-            $id = $_GET['id'] ?? null;
-        else if ($_SERVER['REQUEST_METHOD'] === 'POST')
-            $id = $_POST['id'] ?? null;
-        else
-        {
-            echo 'Invalid request.';
-            exit;
-        }
-
+        $id = $_REQUEST['id'] ?? null;
         if (!$id)
         {
             http_response_code(400);
@@ -39,24 +53,36 @@ class ProducerController extends Controller
             return;
         }
 
-        $id = (int)$id;
-        $deleted = $this->producerModel->deleteProducer($id);
+        $deleted = $this->producerModel->deleteProducer((int)$id);
 
         if ($deleted)
         {
             header('Location: /producers');
             exit;
         }
-        else
+
+        http_response_code(404);
+        echo "Producer not found or could not be deleted.";
+    }
+
+    public function edit()
+    {
+        $id = $_GET['id'] ?? null;
+        if (!$id)
         {
-            http_response_code(404);
-            echo "Producer not found or could not be deleted.";
+            http_response_code(400);
+            echo "Bad Request: Producer ID is required.";
+            return;
         }
+
+        $producer = $this->getProducerOrFail((int)$id);
+        $this->render('Producer/edit', ['producer' => $producer]);
     }
 
     public function update()
     {
-        // update a producer
+        $this->requirePost();
+
         $id = $_POST['id'] ?? null;
         $user_id = $_POST['user_id'] ?? null;
         $studio_name = $_POST['studio_name'] ?? null;
@@ -71,15 +97,7 @@ class ProducerController extends Controller
 
         $id = (int)$id;
         $user_id = (int)$user_id;
-
-        $producer = $this->producerModel->getProducerById($id);
-
-        if (!$producer)
-        {
-            http_response_code(404);
-            echo "Producer not found.";
-            return;
-        }
+        $producer = $this->getProducerOrFail($id);
 
         $updated = $this->producerModel->updateProducer($id, $user_id, $studio_name, $bio);
 
@@ -88,34 +106,77 @@ class ProducerController extends Controller
             header('Location: /producers');
             exit;
         }
-        else
-        {
-            http_response_code(500);
-            echo "Failed to update producer.";
-        }
+
+        http_response_code(500);
+        echo "Failed to update producer.";
     }
 
-    public function edit()
+    public function editProfile()
     {
-        $id = $_GET['id'] ?? null;
+        // render the edit form
+        $userId = $_SESSION['user_id'];
+        $user = User::getUserById($userId);
+        $producer = Producer::getByUserId($userId);
 
-        if (!$id)
-        {
-            http_response_code(400);
-            echo "Bad Request: Producer ID is required.";
-            return;
-        }
-
-        $id = (int)$id;
-        $producer = $this->producerModel->getProducerById($id);
-
-        if (!$producer)
+        if (!$producer || !$user)
         {
             http_response_code(404);
-            echo "Producer not found.";
+            echo "Profile not found.";
             return;
         }
 
-        $this->render('Producer/edit', ['producer' => $producer]);
+        $this->render('Producer/editProfile', [
+            'producer' => $producer,
+            'user' => $user
+        ]);
+    }
+
+    public function updateProfile()
+    {
+        $userId = $_SESSION['user_id'];
+        $producer = Producer::getByUserId($userId);
+        $user = User::getUserById($userId);
+
+        if (!$producer || !$user)
+        {
+            http_response_code(404);
+            echo "Profile not found.";
+            return;
+        }
+
+        // Get user inputs
+        $username = trim($_POST['username'] ?? '');
+        $name = trim($_POST['name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $password = $_POST['password'] ?? '';
+        $studio_name = trim($_POST['studio_name'] ?? '');
+        $bio = trim($_POST['bio'] ?? '');
+
+        // Validate required fields
+        if ($name === '' || $email === '' || $studio_name === '')
+        {
+            http_response_code(400);
+            echo "Name, email, and studio name are required.";
+            return;
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL))
+        {
+            http_response_code(400);
+            echo "Invalid email address.";
+            return;
+        }
+
+        // update user
+        if ($password)
+            User::updateUser($user->id, $user->role_id, $username, $name, $email, $password);
+        else
+            User::updateUser($user->id, $user->role_id, $username, $name, $email);
+
+        // update producer
+        Producer::updateProducer($producer->id, $user->id, $studio_name, $bio);
+
+        header('Location: /producer/dashboard');
+        exit;
     }
 }

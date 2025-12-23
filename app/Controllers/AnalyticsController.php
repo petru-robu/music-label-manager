@@ -15,7 +15,6 @@ class AnalyticsController extends Controller
     public function index()
     {
         // returns the index analytics view
-
         $totals = Analytics::getTotals();
         $viewsPerDay = Analytics::getViewsPerDay();
         $topPages = Analytics::getTopPages();

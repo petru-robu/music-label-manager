@@ -13,34 +13,65 @@ class AlbumController extends Controller
         $this->albumModel = new Album();
     }
 
-    public function index($artist_id)
+    // HELPER METHODS
+    private function requireUser(string $message)
     {
-        // returns a view of all albums
-        $albums = $this->albumModel->getAll();
+        // require logged in user
+        $user_id = $_SESSION['user_id'] ?? null;
+        if (!$user_id)
+        {
+            http_response_code(403);
+            echo $message;
+            return null;
+        }
+        return $user_id;
+    }
+
+    private function requireArtist($user_id, $artist_id, string $message)
+    {
+        // compare current logged-in artist with the route artist_id
+        $artist = Artist::getByUserId($user_id);
+        if (!$artist || ($artist_id !== null && $artist->id != (int)$artist_id))
+        {
+            http_response_code(403);
+            echo $message;
+            return null;
+        }
+        return $artist;
+    }
+
+    private function requireOwnedAlbum($artist, $album_id, string $message)
+    {
+        // compare album's artist with the route artist_id   
+        $album = $this->albumModel->getAlbumById((int)$album_id);
+        if (!$album || $album->artist_id != $artist->id)
+        {
+            http_response_code(404);
+            echo $message;
+            return null;
+        }
+        return $album;
+    }
+
+    // CONTROLLER ACTIONS
+    public function index()
+    {
+        // list all albums with artist names
+        $albums = $this->albumModel->getAllWithArtistName();
         $this->render('Album/index', ['albums' => $albums]);
     }
 
     public function indexByArtist($artist_id)
     {
-        // Ensure user is logged in
-        $user_id = $_SESSION['user_id'] ?? null;
+        // list the albums owned by an artist
+        $user_id = $this->requireUser("Unauthorized.");
         if (!$user_id)
-        {
-            http_response_code(403);
-            echo "Unauthorized.";
             return;
-        }
-        
-        // Get the artist for the logged-in user
-        $artist = Artist::getByUserId($user_id);
-        if (!$artist || $artist->id != (int)$artist_id)
-        {
-            http_response_code(403);
-            echo "Unauthorized artist";
-            return;
-        }
 
-        // get all albums for this artist
+        $artist = $this->requireArtist($user_id, $artist_id, "Unauthorized artist");
+        if (!$artist)
+            return;
+
         $albums = $this->albumModel->getByArtistId($artist_id);
 
         $this->render('Album/indexArtist', [
@@ -51,37 +82,23 @@ class AlbumController extends Controller
 
     public function delete($artist_id, $album_id)
     {
-        // delete a specific album
-        $user_id = $_SESSION['user_id'] ?? null;
+        // delete an album from an user
+        $user_id = $this->requireUser("Unauthorized");
         if (!$user_id)
-        {
-            http_response_code(403);
-            echo "Unauthorized";
             return;
-        }
 
-        $artist = Artist::getByUserId($user_id);
-        if (!$artist || $artist->id != (int)$artist_id)
-        {
-            http_response_code(403);
-            echo "Unauthorized artist";
+        $artist = $this->requireArtist($user_id, $artist_id, "Unauthorized artist");
+        if (!$artist)
             return;
-        }
 
-        $album = $this->albumModel->getAlbumById((int)$album_id);
-
-        if (!$album || $album->artist_id != $artist->id)
-        {
-            http_response_code(404);
-            echo "Album not found";
+        $album = $this->requireOwnedAlbum($artist, $album_id, "Album not found");
+        if (!$album)
             return;
-        }
 
         $deleted = $this->albumModel->deleteAlbum((int)$album_id);
 
         if ($deleted)
         {
-            // deleted successfully
             header("Location: /artist/{$artist->id}/album");
             exit;
         }
@@ -92,22 +109,14 @@ class AlbumController extends Controller
 
     public function update($artist_id, $album_id)
     {
-        // update a specific album
-        $user_id = $_SESSION['user_id'] ?? null;
+        // update an album
+        $user_id = $this->requireUser("Unauthorized.");
         if (!$user_id)
-        {
-            http_response_code(403);
-            echo "Unauthorized.";
             return;
-        }
 
-        $artist = Artist::getByUserId($user_id);
-        if (!$artist || $artist->id != (int)$artist_id)
-        {
-            http_response_code(403);
-            echo "Unauthorized artist.";
+        $artist = $this->requireArtist($user_id, $artist_id, "Unauthorized artist.");
+        if (!$artist)
             return;
-        }
 
         $title = $_POST['title'] ?? null;
         $release_year = $_POST['release_year'] ?? null;
@@ -120,14 +129,9 @@ class AlbumController extends Controller
             return;
         }
 
-        $album = $this->albumModel->getAlbumById((int)$album_id);
-
-        if (!$album || $album->artist_id != $artist->id)
-        {
-            http_response_code(404);
-            echo "Album not found.";
+        $album = $this->requireOwnedAlbum($artist, $album_id, "Album not found.");
+        if (!$album)
             return;
-        }
 
         $updated = $this->albumModel->updateAlbum(
             (int)$album_id,
@@ -139,7 +143,6 @@ class AlbumController extends Controller
 
         if ($updated)
         {
-            // update successfully
             header("Location: /artist/{$artist->id}/album");
             exit;
         }
@@ -148,34 +151,20 @@ class AlbumController extends Controller
         echo "Failed to update album.";
     }
 
-
     public function edit($artist_id, $album_id)
     {
-        // returns the view for editing an artist
-        $user_id = $_SESSION['user_id'] ?? null;
+        // acces the edit form of an album
+        $user_id = $this->requireUser("Unauthorized.");
         if (!$user_id)
-        {
-            http_response_code(403);
-            echo "Unauthorized.";
             return;
-        }
 
-        $artist = Artist::getByUserId($user_id);
-        if (!$artist || $artist->id != (int)$artist_id)
-        {
-            http_response_code(403);
-            echo "Unauthorized artist.";
+        $artist = $this->requireArtist($user_id, $artist_id, "Unauthorized artist.");
+        if (!$artist)
             return;
-        }
 
-        $album = $this->albumModel->getAlbumById((int)$album_id);
-
-        if (!$album || $album->artist_id != $artist->id)
-        {
-            http_response_code(404);
-            echo "Album not found.";
+        $album = $this->requireOwnedAlbum($artist, $album_id, "Album not found.");
+        if (!$album)
             return;
-        }
 
         $this->render('Album/edit', [
             'album' => $album,
@@ -185,52 +174,31 @@ class AlbumController extends Controller
 
     public function view($artist_id, $album_id)
     {
-        // Ensure user is logged in
-        $user_id = $_SESSION['user_id'] ?? null;
+        // return a view of the album
+        $user_id = $this->requireUser("Unauthorized.");
         if (!$user_id)
-        {
-            http_response_code(403);
-            echo "Unauthorized.";
             return;
-        }
 
-        // Get the artist for the logged-in user
-        $artist = Artist::getByUserId($user_id);
-        if (!$artist || $artist->id != (int)$artist_id)
-        {
-            http_response_code(403);
-            echo "Unauthorized artist";
+        $artist = $this->requireArtist($user_id, $artist_id, "Unauthorized artist");
+        if (!$artist)
             return;
-        }
 
-        // Get the album and check ownership
-        $album = $this->albumModel->getAlbumById((int)$album_id);
-        if (!$album || $album->artist_id != $artist->id)
-        {
-            http_response_code(404);
-            echo "Album not found";
+        $album = $this->requireOwnedAlbum($artist, $album_id, "Album not found");
+        if (!$album)
             return;
-        }
 
-        // Render the view
         $this->render('Album/view', [
             'album' => $album,
             'artist_id' => $artist->id
         ]);
     }
 
-
     public function create()
     {
-        // the create form
-        // get the artist id
-        $user_id = $_SESSION['user_id'] ?? null;
+        // return the album creation form
+        $user_id = $this->requireUser("Unauthorized: User not logged in.");
         if (!$user_id)
-        {
-            http_response_code(403);
-            echo "Unauthorized: User not logged in.";
             return;
-        }
 
         $artist = Artist::getByUserId($user_id);
         if (!$artist)
@@ -239,21 +207,16 @@ class AlbumController extends Controller
             echo "Artist profile not found.";
             return;
         }
-        $artist_id = $artist->id;
-        $this->render('Album/create', ['artist_id' => $artist_id]);
+
+        $this->render('Album/create', ['artist_id' => $artist->id]);
     }
 
     public function store()
     {
-        // store a new album
-        // get the artist id of the current session
-        $user_id = $_SESSION['user_id'] ?? null;
+        // store a new album in the database
+        $user_id = $this->requireUser("Unauthorized: User not logged in.");
         if (!$user_id)
-        {
-            http_response_code(403);
-            echo "Unauthorized: User not logged in.";
             return;
-        }
 
         $artist = Artist::getByUserId($user_id);
         if (!$artist)
@@ -264,7 +227,6 @@ class AlbumController extends Controller
         }
 
         $artist_id = $artist->id;
-        // get data from post request
         $title = $_POST['title'] ?? null;
         $release_year = $_POST['release_year'] ?? null;
         $genre = $_POST['genre'] ?? '';
@@ -283,7 +245,6 @@ class AlbumController extends Controller
             $release_year,
             $genre
         );
-
 
         if ($stored)
         {

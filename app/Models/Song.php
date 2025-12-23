@@ -113,4 +113,21 @@ class Song extends Model
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public static function getAllWithAlbumInfo(): array
+    {
+        $pdo = Database::getConnection();
+
+        $sql = "SELECT s.id, s.title, a.stage_name AS artist, al.release_year AS album_year
+                FROM songs s
+                JOIN albums al ON s.album_id = al.id
+                JOIN artists a ON al.artist_id = a.id
+                ORDER BY s.title ASC";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 }

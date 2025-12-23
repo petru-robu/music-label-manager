@@ -100,4 +100,20 @@ class Album extends Model
         $stmt->execute([':artist_id' => $artist_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    
+    public static function getAllWithArtistName(): array
+    {
+        $pdo = Database::getConnection();
+
+        $sql = "SELECT al.id, al.artist_id, ar.stage_name AS artist_name, al.title, al.release_year, al.genre
+            FROM " . self::$table . " al
+            JOIN artists ar ON al.artist_id = ar.id
+            ORDER BY al.title ASC";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 }
