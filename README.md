@@ -196,16 +196,38 @@ Containers:
 
 ---
 
+### Database
+Access the MySQL container:
+
+```bash
+sudo docker exec -it musiclabel_mysql_db mysql -u root -prootpass
+```
+
+Common MySQL commands inside the container:
+
+```sql
+SHOW DATABASES;          -- List all databases
+USE mydb;                -- Select a database
+CREATE DATABASE db_name; -- Create a new database
+DROP DATABASE db_name;   -- Delete a database
+SHOW TABLES;             -- List tables
+DESCRIBE table_name;     -- Show table structure
+DROP TABLE table_name;   -- Delete a table
+SELECT * FROM table_name;-- Query all records
+EXIT;                    -- Exit MySQL
+```
+
+---
+
 ### Running DB Migrations
 
 ```bash
-docker exec -it musiclabel_apache /bin/bash
+sudo docker exec -it musiclabel_apache /bin/bash
+php app/Commands/migrate.php
 ```
-
 --- 
 ## Network
-### Apache Virtual Host Configuration
-
+The configuration for the domain is done with Apache: 
 ```bash
 # HTTP redirect to HTTPS
 <VirtualHost *:80>
@@ -250,13 +272,4 @@ Certificates auto-renew every 3 months. The Apache virtual host configuration ha
 
 **Tip:** Always back up your `.env` and database before making major changes.
 
----
-
-
-### Running DB Migrations
-
-```bash
-sudo docker exec -it musiclabel_apache /bin/bash
-php app/Commands/migrate.php
-```
 ---
