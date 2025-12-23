@@ -177,6 +177,10 @@ Update database and mail credentials as needed.
 Start the application:
 
 ```bash
+# Stop and remove containers
+sudo docker compose down
+
+# Start and rebuild containers in detached mode
 sudo docker compose up -d --build
 ```
 
@@ -192,11 +196,33 @@ Containers:
 
 ---
 
+### Database
+Access the MySQL container:
+
+```bash
+sudo docker exec -it musiclabel_mysql_db mysql -u root -prootpass
+```
+
+Common MySQL commands inside the container:
+
+```sql
+SHOW DATABASES;          -- List all databases
+USE mydb;                -- Select a database
+CREATE DATABASE db_name; -- Create a new database
+DROP DATABASE db_name;   -- Delete a database
+SHOW TABLES;             -- List tables
+DESCRIBE table_name;     -- Show table structure
+DROP TABLE table_name;   -- Delete a table
+SELECT * FROM table_name;-- Query all records
+EXIT;                    -- Exit MySQL
+```
+
+---
+
 ### Running DB Migrations
 
 ```bash
 sudo docker exec -it musiclabel_apache /bin/bash
 php app/Commands/migrate.php
 ```
-
----
+--- 
