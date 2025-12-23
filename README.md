@@ -181,17 +181,7 @@ Start the application:
 sudo docker compose down
 
 # Start and rebuild containers in detached mode
-# Stop and remove containers
-sudo docker compose down
-
-# Start and rebuild containers in detached mode
 sudo docker compose up -d --build
-```
-
-Stop the application:
-
-```bash
-sudo docker compose down
 ```
 
 Containers:
