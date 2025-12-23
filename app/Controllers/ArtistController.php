@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/Controller.php';
 require_once __DIR__ . '/../Models/Artist.php';
+require_once __DIR__ . '/../Models/User.php';
 
 class ArtistController extends Controller
 {
@@ -12,9 +13,10 @@ class ArtistController extends Controller
         $this->artistModel = new Artist();
     }
 
-    // helpers
+    // HELPERS
     private function requireUser()
     {
+        // require logged in user
         $user_id = $_SESSION['user_id'] ?? null;
         if (!$user_id)
         {
@@ -27,6 +29,7 @@ class ArtistController extends Controller
 
     private function requireArtistOwner($artist_id)
     {
+        // check if logged in artist is artist from route
         $user_id = $this->requireUser();
         if (!$user_id)
             return null;
@@ -44,6 +47,7 @@ class ArtistController extends Controller
 
     private function getRequestId()
     {
+        // get id from post / get
         if ($_SERVER['REQUEST_METHOD'] === 'POST')
         {
             return $_POST['id'] ?? null;
@@ -57,13 +61,15 @@ class ArtistController extends Controller
 
     private function redirectIndex()
     {
+        // redirect to index
         header('Location: /artists');
         exit;
     }
 
-    // actions
+    // ACTIONS
     public function index()
     {
+        // list all artists
         if (!$this->requireUser())
             return;
 
@@ -73,6 +79,7 @@ class ArtistController extends Controller
 
     public function edit()
     {
+        // show the edit form
         $id = $this->getRequestId();
         if (!$id)
         {
@@ -89,6 +96,7 @@ class ArtistController extends Controller
 
     public function update()
     {
+        // update an artist
         if (!$this->requireUser())
             return;
 
@@ -124,6 +132,7 @@ class ArtistController extends Controller
 
     public function delete()
     {
+        // delete an artist
         $id = $this->getRequestId();
         if (!$id)
         {
@@ -143,4 +152,74 @@ class ArtistController extends Controller
         http_response_code(404);
         echo "Artist not found or could not be deleted.";
     }
+
+    public function editProfile()
+    {
+        // render the edit form
+        $userId = $_SESSION['user_id'];
+
+        $artist = Artist::getByUserId($userId);
+        $user = User::getUserById($userId); // assuming you have a User model
+
+        if (!$artist || !$user)
+        {
+            http_response_code(404);
+            echo "Profile not found.";
+            return;
+        }
+
+        $this->render('Artist/editProfile', [
+            'artist' => $artist,
+            'user' => $user
+        ]);
+    }
+
+    public function updateProfile()
+    {
+        $userId = $_SESSION['user_id'];
+        $artist = Artist::getByUserId($userId);
+        $user = User::getUserById($userId);
+
+        if (!$artist || !$user)
+        {
+            http_response_code(404);
+            echo "Profile not found.";
+            return;
+        }
+
+        // Get user inputs
+        $username = trim($_POST['username'] ?? '');
+        $name = trim($_POST['name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $password = $_POST['password'] ?? '';
+        $stage_name = trim($_POST['stage_name'] ?? '');
+        $bio = trim($_POST['bio'] ?? '');
+
+        // Validate required fields
+        if ($name === '' || $email === '' || $stage_name === '')
+        {
+            http_response_code(400);
+            echo "Name, email, and stage name are required.";
+            return;
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL))
+        {
+            http_response_code(400);
+            echo "Invalid email address.";
+            return;
+        }
+        // Only update password if it's not empty
+        if($password)
+            User::updateUser($userId, $user->role_id, $username, $name, $email, $password);
+        else
+            User::updateUser($userId, $user->role_id, $username, $name, $email);
+
+        // Update artist
+        Artist::updateArtist($artist->id, $userId, $stage_name, $bio);
+
+        header('Location: /artist/dashboard');
+        exit;
+    }
+
 }

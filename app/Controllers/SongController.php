@@ -16,8 +16,78 @@ class SongController extends Controller
         $this->albumModel = new Album();
     }
 
+    // HELPERS
+    private function requireUser(string $message)
+    {
+        $user_id = $_SESSION['user_id'] ?? null;
+        if (!$user_id)
+        {
+            http_response_code(403);
+            echo $message;
+            return null;
+        }
+        return $user_id;
+    }
+
+    private function requireArtist($user_id, $artist_id, string $message)
+    {
+        $artist = Artist::getByUserId($user_id);
+        if (!$artist || $artist->id != (int)$artist_id)
+        {
+            http_response_code(403);
+            echo $message;
+            return null;
+        }
+        return $artist;
+    }
+
+    private function requireAlbum($artist, $album_id, string $message)
+    {
+        $album = $this->albumModel->getAlbumById((int)$album_id);
+        if (!$album || $album->artist_id != $artist->id)
+        {
+            http_response_code(404);
+            echo $message;
+            return null;
+        }
+        return $album;
+    }
+
+    private function requireSong($album, $song_id, string $message)
+    {
+        $song = $this->songModel->getSongById((int)$song_id);
+        if (!$song || $song->album_id != $album->id)
+        {
+            http_response_code(404);
+            echo $message;
+            return null;
+        }
+        return $song;
+    }
+
+    // CONTROLLER ACTIONS
+    public function index()
+    {
+        // Fetch all songs with artist and album year
+        $songs = $this->songModel->getAllWithAlbumInfo();
+        $this->render('Song/index', ['songs' => $songs]);
+    }
+
+
     public function indexByAlbum($artist_id, $album_id)
     {
+        $user_id = $this->requireUser("Unauthorized.");
+        if (!$user_id)
+            return;
+
+        $artist = $this->requireArtist($user_id, $artist_id, "Unauthorized artist.");
+        if (!$artist)
+            return;
+
+        $album = $this->requireAlbum($artist, $album_id, "Album not found.");
+        if (!$album)
+            return;
+
         $songs = $this->songModel->getByAlbumId((int)$album_id);
 
         $this->render('Song/indexAlbum', [
@@ -29,29 +99,17 @@ class SongController extends Controller
 
     public function create($artist_id, $album_id)
     {
-        $user_id = $_SESSION['user_id'] ?? null;
+        $user_id = $this->requireUser("Unauthorized.");
         if (!$user_id)
-        {
-            http_response_code(403);
-            echo "Unauthorized.";
             return;
-        }
 
-        $artist = Artist::getByUserId($user_id);
-        if (!$artist || $artist->id != (int)$artist_id)
-        {
-            http_response_code(403);
-            echo "Unauthorized artist.";
+        $artist = $this->requireArtist($user_id, $artist_id, "Unauthorized artist.");
+        if (!$artist)
             return;
-        }
 
-        $album = $this->albumModel->getAlbumById((int)$album_id);
-        if (!$album || $album->artist_id != $artist->id)
-        {
-            http_response_code(404);
-            echo "Album not found.";
+        $album = $this->requireAlbum($artist, $album_id, "Album not found.");
+        if (!$album)
             return;
-        }
 
         $this->render('Song/create', [
             'artist_id' => $artist->id,
@@ -61,29 +119,17 @@ class SongController extends Controller
 
     public function store($artist_id, $album_id)
     {
-        $user_id = $_SESSION['user_id'] ?? null;
+        $user_id = $this->requireUser("Unauthorized.");
         if (!$user_id)
-        {
-            http_response_code(403);
-            echo "Unauthorized.";
             return;
-        }
 
-        $artist = Artist::getByUserId($user_id);
-        if (!$artist || $artist->id != (int)$artist_id)
-        {
-            http_response_code(403);
-            echo "Unauthorized artist.";
+        $artist = $this->requireArtist($user_id, $artist_id, "Unauthorized artist.");
+        if (!$artist)
             return;
-        }
 
-        $album = $this->albumModel->getAlbumById((int)$album_id);
-        if (!$album || $album->artist_id != $artist->id)
-        {
-            http_response_code(404);
-            echo "Album not found.";
+        $album = $this->requireAlbum($artist, $album_id, "Album not found.");
+        if (!$album)
             return;
-        }
 
         $title = $_POST['title'] ?? null;
         $duration = $_POST['duration'] ?? null;
@@ -113,37 +159,21 @@ class SongController extends Controller
 
     public function edit($artist_id, $album_id, $song_id)
     {
-        $user_id = $_SESSION['user_id'] ?? null;
+        $user_id = $this->requireUser("Unauthorized.");
         if (!$user_id)
-        {
-            http_response_code(403);
-            echo "Unauthorized.";
             return;
-        }
 
-        $artist = Artist::getByUserId($user_id);
-        if (!$artist || $artist->id != (int)$artist_id)
-        {
-            http_response_code(403);
-            echo "Unauthorized artist.";
+        $artist = $this->requireArtist($user_id, $artist_id, "Unauthorized artist.");
+        if (!$artist)
             return;
-        }
 
-        $album = $this->albumModel->getAlbumById((int)$album_id);
-        if (!$album || $album->artist_id != $artist->id)
-        {
-            http_response_code(404);
-            echo "Album not found.";
+        $album = $this->requireAlbum($artist, $album_id, "Album not found.");
+        if (!$album)
             return;
-        }
 
-        $song = $this->songModel->getSongById((int)$song_id);
-        if (!$song || $song->album_id != $album->id)
-        {
-            http_response_code(404);
-            echo "Song not found.";
+        $song = $this->requireSong($album, $song_id, "Song not found.");
+        if (!$song)
             return;
-        }
 
         $this->render('Song/edit', [
             'song' => $song,
@@ -154,37 +184,21 @@ class SongController extends Controller
 
     public function update($artist_id, $album_id, $song_id)
     {
-        $user_id = $_SESSION['user_id'] ?? null;
+        $user_id = $this->requireUser("Unauthorized.");
         if (!$user_id)
-        {
-            http_response_code(403);
-            echo "Unauthorized.";
             return;
-        }
 
-        $artist = Artist::getByUserId($user_id);
-        if (!$artist || $artist->id != (int)$artist_id)
-        {
-            http_response_code(403);
-            echo "Unauthorized artist.";
+        $artist = $this->requireArtist($user_id, $artist_id, "Unauthorized artist.");
+        if (!$artist)
             return;
-        }
 
-        $album = $this->albumModel->getAlbumById((int)$album_id);
-        if (!$album || $album->artist_id != $artist->id)
-        {
-            http_response_code(404);
-            echo "Album not found.";
+        $album = $this->requireAlbum($artist, $album_id, "Album not found.");
+        if (!$album)
             return;
-        }
 
-        $song = $this->songModel->getSongById((int)$song_id);
-        if (!$song || $song->album_id != $album->id)
-        {
-            http_response_code(404);
-            echo "Song not found.";
+        $song = $this->requireSong($album, $song_id, "Song not found.");
+        if (!$song)
             return;
-        }
 
         $title = $_POST['title'] ?? null;
         $duration = $_POST['duration'] ?? null;
@@ -214,37 +228,21 @@ class SongController extends Controller
 
     public function delete($artist_id, $album_id, $song_id)
     {
-        $user_id = $_SESSION['user_id'] ?? null;
+        $user_id = $this->requireUser("Unauthorized.");
         if (!$user_id)
-        {
-            http_response_code(403);
-            echo "Unauthorized.";
             return;
-        }
 
-        $artist = Artist::getByUserId($user_id);
-        if (!$artist || $artist->id != (int)$artist_id)
-        {
-            http_response_code(403);
-            echo "Unauthorized artist.";
+        $artist = $this->requireArtist($user_id, $artist_id, "Unauthorized artist.");
+        if (!$artist)
             return;
-        }
 
-        $album = $this->albumModel->getAlbumById((int)$album_id);
-        if (!$album || $album->artist_id != $artist->id)
-        {
-            http_response_code(404);
-            echo "Album not found.";
+        $album = $this->requireAlbum($artist, $album_id, "Album not found.");
+        if (!$album)
             return;
-        }
 
-        $song = $this->songModel->getSongById((int)$song_id);
-        if (!$song || $song->album_id != $album->id)
-        {
-            http_response_code(404);
-            echo "Song not found.";
+        $song = $this->requireSong($album, $song_id, "Song not found.");
+        if (!$song)
             return;
-        }
 
         $deleted = $this->songModel->deleteSong($song->id);
 

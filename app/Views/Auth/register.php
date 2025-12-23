@@ -1,4 +1,4 @@
-<h2>Register</h2>
+<h2>Register as a Listener</h2>
 
 <?php if (!empty($error)): ?>
     <div class="alert alert-error"><?= $error ?></div>

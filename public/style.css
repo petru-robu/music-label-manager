@@ -190,3 +190,11 @@ input, select, textarea {
     color: #7f1d1d;
     border: 1px solid #f87171;
 }
+
+
+/* extra arrows */  
+
+.sort-arrows {
+    cursor: pointer;
+    user-select: none; /* prevents text selection */
+}

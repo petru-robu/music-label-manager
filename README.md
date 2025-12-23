@@ -1,46 +1,180 @@
 # Music Label Manager
 
-A web application for managing music labels, producers, and artists.
+A PHP web application for managing music labels, artists, producers, and albums, built using a MySQL database and following the MVC architectural pattern.
 
-Branch: **DEPLOYMENT**
+**Branch:** `DEPLOYMENT`
 
-## Setup
+---
 
-### Environment Variables
+## Project Overview
 
-After cloning the repository, create your `.env` file:
+Music Label Manager is a dynamic, role-based web application that allows users to manage musical content, generate reports, analyze site activity, and interact through contact forms. The application is fully containerized with Docker and emphasizes security, scalability, and clean architecture.
 
-```bash
-cp .env.example .env
-```
+---
 
-`.env.example` contains database configuration:
+## Requirements & Implementation
 
-```bash
+### 1. MySQL Database and PHP Backend
+
+The project is developed in **PHP** and uses a **MySQL** relational database for data storage. 
+All database interactions are handled through PDO for security and consistency.
+
+Environment variables for database configuration are defined in the `.env` file:
+
+```env
 DB_CONNECTION=mysql
 DB_HOST=db
 DB_PORT=3306
 DB_DATABASE=mydb
 DB_USERNAME=myuser
 DB_PASSWORD=mypass
-DB_SSL_MODE=DISABLED
 ```
 
-> Note: Environment variables can be overridden by those defined in `docker-compose.yml`. Be careful when making changes.
+---
+
+### 2. CRUD Operations (Create, Read, Update, Delete)
+
+The application supports full database operations:
+
+- **Add** new users, artists, albums, and songs 
+- **Read** and display records on dynamic pages 
+- **Update** user profiles and content 
+- **Delete** records with proper authorization 
+
+These operations are implemented through Models in the MVC architecture.
+
+---
+
+### 3. User Authentication and Registration
+
+The application provides:
+
+- User registration page 
+- Login/logout system 
+- Secure password hashing 
+- Session-based authentication 
+
+Users must be authenticated to access protected routes.
+
+---
+
+### 4. Multiple User Roles
+
+The system supports multiple user categories, each with specific permissions:
+
+- **Listener** – browse content 
+- **Artist** – manage own albums and songs 
+- **Producer** – produce an artist's album
+- **Admin** – manage and moderate users
+
+Role-based access is enforced through middleware.
+
+---
+
+### 5. Dynamic Pages with Navigation
+
+The application contains multiple dynamic pages such as:
+
+- Dashboard 
+- Artist pages 
+- Album and song pages 
+- Analytics pages 
+- Admin panel
+
+Pages are linked together through routing, and content is generated dynamically from the database.
+
+---
+
+### 6. Report Generation (PDF)
+
+The system can generate downloadable **PDF reports** for users using the `setasign/fpdf` library.
+
+Reports include:
+- User general information
+- Activity data
+
+These reports are generated directly from controllers and are not limited to HTML or CSV formats.
+
+---
+
+### 7. Website Analytics and Statistics
+
+The application tracks and displays:
+
+- Total visits 
+- Views per day 
+- Most accessed pages 
+
+Charts are generated using the `maantje/charts` library and rendered dynamically in the analytics dashboard.
+
+---
+
+### 8. Contact Form and Email Sending
+
+A contact form allows users to send messages to the site administrator.
+
+Email sending is implemented using **PHPMailer** with SMTP configuration:
+
+```env
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_app_password
+CONTACT_RECEIVER_EMAIL=your_email@gmail.com
+```
+
+---
+
+### 9. External Content Integration (Parsing)
+
+The application integrates external information by parsing content from **Wikipedia** using cURL.
+
+For example:
+- Album information is fetched by giving a search query to wikipedia.
+- The response is parsed and displayed inside the application.
+
+This enriches the content without storing external pages.
+
+---
+
+### 10. Session Management and Logout
+
+User sessions are managed using PHP sessions.
+
+Features include:
+- Session start on login 
+- Role and user ID stored in session 
+- Secure logout functionality that destroys the session and redirects users 
+
+This ensures proper session ending and access control.
+
+---
+
+## Architecture
+
+The project follows the **MVC (Model–View–Controller)** pattern:
+
+- **Models** handle database logic. 
+- **Views** render UI templates inside layouts. 
+- **Controllers** process requests and return views. 
+
+Routing and middleware manage navigation and access control.
+
+---
+
+## Setup
+
+### Environment
+
+```bash
+cp .env.example .env
+```
+
+Update database and mail credentials as needed.
+
+---
 
 ### Docker
 
-The application is fully containerized using Docker.
-
-* `docker-compose.yml` defines containers, networks, and volumes.
-* `Dockerfile` sets up PHP and Apache, configures permissions, and exposes the necessary ports.
-
-This setup uses two containers:
-
-* **MySQL Database:** `musiclabel_mysql_db`
-* **PHP/Apache:** `musiclabel_apache`
-
-#### Start/Stop the Application
+Start the application:
 
 ```bash
 # Stop and remove containers
@@ -50,50 +184,27 @@ sudo docker compose down
 sudo docker compose up -d --build
 ```
 
-#### Useful Docker Commands
+Stop the application:
 
 ```bash
-# List all containers
-sudo docker ps -a
-
-# Stop specific containers
-sudo docker stop musiclabel_apache musiclabel_mysql_db
-
-# Remove specific containers
-sudo docker rm -f musiclabel_apache musiclabel_mysql_db
+sudo docker compose down
 ```
 
-### MySQL Database
+Containers:
+- `musiclabel_mysql_db` – MySQL database 
+- `musiclabel_apache` – PHP & Apache server
 
-Access the MySQL container:
+---
 
-```bash
-sudo docker exec -it musiclabel_mysql_db mysql -u root -prootpass
-```
-
-Common MySQL commands inside the container:
-
-```sql
-SHOW DATABASES;          -- List all databases
-USE mydb;                -- Select a database
-CREATE DATABASE db_name; -- Create a new database
-DROP DATABASE db_name;   -- Delete a database
-SHOW TABLES;             -- List tables
-DESCRIBE table_name;     -- Show table structure
-DROP TABLE table_name;   -- Delete a table
-SELECT * FROM table_name;-- Query all records
-EXIT;                    -- Exit MySQL
-```
-
-### Apache Web Server
-
-Access the Apache container:
+### Running DB Migrations
 
 ```bash
 docker exec -it musiclabel_apache /bin/bash
 ```
 
-#### Apache Virtual Host Configuration
+--- 
+## Network
+### Apache Virtual Host Configuration
 
 ```bash
 # HTTP redirect to HTTPS
@@ -123,6 +234,7 @@ docker exec -it musiclabel_apache /bin/bash
     CustomLog ${APACHE_LOG_DIR}/access.log combined
 </VirtualHost>
 ```
+---
 
 ### SSL Certificates
 
@@ -138,17 +250,13 @@ Certificates auto-renew every 3 months. The Apache virtual host configuration ha
 
 **Tip:** Always back up your `.env` and database before making major changes.
 
-## Application Flow
-### Running migrations
+---
 
-To run a migration you need to:
 
-Enter the docker container:
+### Running DB Migrations
+
 ```bash
 sudo docker exec -it musiclabel_apache /bin/bash
-```
-
-Run the php file to apply everything in the migrations folder:
-```bash
 php app/Commands/migrate.php
 ```
+---

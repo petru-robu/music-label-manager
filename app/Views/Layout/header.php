@@ -1,6 +1,16 @@
 <?php
+require_once __DIR__ . '/../../Models/User.php';
+
 $isLoggedIn = isset($_SESSION['user_id']);
-$username = $_SESSION['username'] ?? '';
+$username = '';
+
+if ($isLoggedIn) {
+    $userId = $_SESSION['user_id'];
+    $user = User::getUserById($userId);
+    if ($user) {
+        $username = $user->username ?? '';
+    }
+}
 ?>
 
 <!DOCTYPE html>

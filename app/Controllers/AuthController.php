@@ -14,16 +14,10 @@ class AuthController extends Controller
     public function __construct()
     {
         $this->userModel = new User();
-
-        if (session_status() === PHP_SESSION_NONE)
-        {
-            session_start();
-        }
-
         $this->mailService = new MailService();
     }
 
-    // session/error helpers
+    // HELPERS
     private function setError(string $message)
     {
         $_SESSION['error'] = $message;
@@ -42,15 +36,15 @@ class AuthController extends Controller
         return $this->render($view, array_merge($extra, ['error' => $error]));
     }
 
-    // captcha
     private function validateCaptcha(string $input): bool
     {
+        // validate captcha response
         return !empty($input) && $input === ($_SESSION['captcha'] ?? '');
     }
 
-    /* ---------- User & Profile Creation ---------- */
     private function checkUsernameEmail(string $username, string $email): bool
     {
+        // input validation
         if ($this->userModel->usernameExists($username))
         {
             $this->setError('Username already exists!');
@@ -98,7 +92,7 @@ class AuthController extends Controller
         catch (\Throwable $e)
         {
             if ($profileCreator)
-                $profileCreator = null; // rollback if needed
+                $profileCreator = null;
             $this->userModel->deleteUser($user_id);
             $this->setError('Registration failed: email service error.');
             return null;
@@ -107,9 +101,10 @@ class AuthController extends Controller
         return $user_id;
     }
 
-    // actions
+    // CONTROLLER ACTIONS
     public function login()
     {
+        // login
         if ($_SERVER['REQUEST_METHOD'] === 'GET')
         {
             return $this->renderWithError('Auth/login');
@@ -126,8 +121,8 @@ class AuthController extends Controller
             header('Location: /login');
             exit;
         }
-
-        // Login success
+        
+        // success
         $_SESSION['user_id'] = $user->id;
         $_SESSION['username'] = $user->username;
         $_SESSION['role'] = $user->role_id;

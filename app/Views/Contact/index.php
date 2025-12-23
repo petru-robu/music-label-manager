@@ -1,17 +1,15 @@
 <h2>Send us an email:</h2>
 
-<?php if (!empty($_SESSION['success'])): ?>
+<?php if (!empty($success)): ?>
     <div class="alert alert-success">
-        <?= htmlspecialchars($_SESSION['success']) ?>
+        <?= htmlspecialchars($success) ?>
     </div>
-    <?php unset($_SESSION['success']); ?>
 <?php endif; ?>
 
-<?php if (!empty($_SESSION['error'])): ?>
+<?php if (!empty($error)): ?>
     <div class="alert alert-error">
-        <?= htmlspecialchars($_SESSION['error']) ?>
+        <?= htmlspecialchars($error) ?>
     </div>
-    <?php unset($_SESSION['error']); ?>
 <?php endif; ?>
 
 <form method="POST" action="/contact/submit">
@@ -32,7 +30,7 @@
 
     <div style="margin-top:10px;">
         <img src="/captcha.php" alt="CAPTCHA">
-        <input type="text" name="captcha" placeholder="Enter CAPTCHA" required style="display:block; margin-top:5px;">
+        <input type="text" name="captcha" placeholder="Enter CAPTCHA" required>
     </div>
 
     <button type="submit">Send</button>
