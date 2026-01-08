@@ -85,18 +85,18 @@ class AuthController extends Controller
         }
 
         // send welcome email safely
-        try
-        {
-            $this->mailService->send($email, 'Welcome', 'Thanks for registering.');
-        }
-        catch (\Throwable $e)
-        {
-            if ($profileCreator)
-                $profileCreator = null;
-            $this->userModel->deleteUser($user_id);
-            $this->setError('Registration failed: email service error.');
-            return null;
-        }
+        // try
+        // {
+        //     $this->mailService->send($email, 'Welcome', 'Thanks for registering.');
+        // }
+        // catch (\Throwable $e)
+        // {
+        //     if ($profileCreator)
+        //         $profileCreator = null;
+        //     $this->userModel->deleteUser($user_id);
+        //     $this->setError('Registration failed: email service error.');
+        //     return null;
+        // }
 
         return $user_id;
     }
